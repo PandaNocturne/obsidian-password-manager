@@ -25,3 +25,6 @@ data.json
 
 # Exclude macOS Finder (System Explorer) View States
 .DS_Store
+.specstory/.project.json
+.specstory/statistics.json
+.specstory/cli/config.toml
