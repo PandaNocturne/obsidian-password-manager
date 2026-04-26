@@ -7,8 +7,6 @@ import {
   isEncryptedLibraryImportText,
 } from '../data/import-service';
 import {
-  downloadCsvGroup,
-  downloadCsvGroups,
   downloadJson,
   downloadMarkdownGroup,
   downloadMarkdownGroups,
@@ -48,7 +46,7 @@ export class PasswordTransferService {
     new Notice(PWM_TEXT.EXPORT_SUCCESS);
   }
 
-  exportGroup(groupId: string, format: 'json' | 'markdown' | 'csv' = 'json') {
+  exportGroup(groupId: string, format: 'json' | 'markdown' = 'json') {
     const group = this.context.getGroup(groupId);
     if (!group) {
       return false;
@@ -58,8 +56,6 @@ export class PasswordTransferService {
     const items = this.context.getItemsByGroup(groupId);
     if (format === 'markdown') {
       downloadMarkdownGroup(appendDateTimeSuffix(`${group.name || 'group'}.md`, exportedAt), group, items);
-    } else if (format === 'csv') {
-      downloadCsvGroup(appendDateTimeSuffix(`${group.name || 'group'}.csv`, exportedAt), group, items);
     } else {
       downloadJson(appendDateTimeSuffix(`${group.name || 'group'}.json`, exportedAt), {
         version: 1,
@@ -75,7 +71,7 @@ export class PasswordTransferService {
     return true;
   }
 
-  exportGroups(groupIds: string[], format: 'json' | 'markdown' | 'csv' = 'json') {
+  exportGroups(groupIds: string[], format: 'json' | 'markdown' = 'json') {
     const groupsWithItems = groupIds
       .map((groupId) => {
         const group = this.context.getGroup(groupId);
@@ -97,8 +93,6 @@ export class PasswordTransferService {
     const exportedAt = Date.now();
     if (format === 'markdown') {
       downloadMarkdownGroups(appendDateTimeSuffix('selected-groups.md', exportedAt), groupsWithItems);
-    } else if (format === 'csv') {
-      downloadCsvGroups(appendDateTimeSuffix('selected-groups.csv', exportedAt), groupsWithItems);
     } else {
       downloadJson(appendDateTimeSuffix('selected-groups.json', exportedAt), {
         version: 1,

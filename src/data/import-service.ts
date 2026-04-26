@@ -9,7 +9,7 @@ import type {
 import { normalizeImportedLibraryData, normalizeUrls } from './normalize';
 import { DEFAULT_DATA } from './defaults';
 import { createGroup, createItem, reindexOrders } from './password-library-service';
-import { parseCsvGroup, parseImportPayload, parseMarkdownGroup, parseMarkdownItems } from './transfer';
+import { parseImportPayload, parseMarkdownGroup, parseMarkdownItems } from './transfer';
 
 function assertImportPayload(
   payload: PasswordManagerExportPayload,
@@ -119,15 +119,9 @@ export function importGroupFromText(text: string, data: PasswordManagerData): Pa
     createdAt = typeof source.group.createdAt === 'number' ? source.group.createdAt : Date.now();
     items = source.items;
   } catch {
-    try {
-      const markdownGroup = parseMarkdownGroup(text);
-      groupName = markdownGroup.groupName;
-      items = markdownGroup.items;
-    } catch {
-      const csvGroup = parseCsvGroup(text);
-      groupName = csvGroup.groupName;
-      items = csvGroup.items;
-    }
+    const markdownGroup = parseMarkdownGroup(text);
+    groupName = markdownGroup.groupName;
+    items = markdownGroup.items;
   }
 
   const group = createGroup(data, groupName);

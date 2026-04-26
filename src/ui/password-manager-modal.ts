@@ -472,7 +472,7 @@ export class PasswordManagerModal extends Modal {
         this.selectedItemId = this.getPreferredSelectedItemId(this.selectedGroupId);
         this.resetGroupSelection(this.selectedGroupId);
         this.resetItemSelection(this.selectedItemId);
-      }, 'application/json,text/markdown,text/plain,text/csv,.json,.md,.markdown,.txt,.csv');
+      }, 'application/json,text/markdown,.json,.md');
     });
     const searchField = this.searchActionsEl.createDiv({ cls: 'pwm-modal-header-search-wrap' });
     const searchIcon = searchField.createDiv({ cls: 'pwm-modal-header-search-icon' });
@@ -754,7 +754,7 @@ export class PasswordManagerModal extends Modal {
         this.selectedItemId = this.getPreferredSelectedItemId(group.id);
         this.resetGroupSelection(group.id);
         this.resetItemSelection(this.selectedItemId);
-      }, 'application/json,text/markdown,text/plain,text/csv,.json,.md,.markdown,.txt,.csv');
+      }, 'application/json,text/markdown,.json,.md');
     });
     const exportGroupButton = this.plugin.createIconButton(footer, 'folder-up', PWM_TEXT.EXPORT_GROUP, () => { });
     exportGroupButton.addEventListener('click', (event) => {
@@ -777,12 +777,6 @@ export class PasswordManagerModal extends Modal {
         item.setTitle(PWM_TEXT.EXPORT_FORMAT_MARKDOWN);
         item.onClick(() => {
           void this.plugin.exportGroups(groupIds, 'markdown');
-        });
-      });
-      menu.addItem((item) => {
-        item.setTitle(PWM_TEXT.EXPORT_FORMAT_CSV);
-        item.onClick(() => {
-          void this.plugin.exportGroups(groupIds, 'csv');
         });
       });
       menu.showAtMouseEvent(event);
@@ -973,7 +967,7 @@ export class PasswordManagerModal extends Modal {
           this.selectedItemId = firstImportedItem.id;
           this.resetItemSelection(firstImportedItem.id);
         }
-      }, 'application/json,text/markdown,text/plain,.json,.md,.markdown,.txt');
+      }, 'application/json,text/markdown,.json,.md');
     });
     const exportSelectedItemsButton = this.plugin.createIconButton(footer, 'file-up', PWM_TEXT.EXPORT_SELECTED_ITEMS, () => undefined);
     exportSelectedItemsButton.addEventListener('click', (event) => {

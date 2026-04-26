@@ -145,11 +145,11 @@ export default class PasswordManagerPlugin extends Plugin {
     return this.transferService.exportLibrary();
   }
 
-  exportGroup(groupId: string, format: 'json' | 'markdown' | 'csv' = 'json') {
+  exportGroup(groupId: string, format: 'json' | 'markdown' = 'json') {
     return this.transferService.exportGroup(groupId, format);
   }
 
-  exportGroups(groupIds: string[], format: 'json' | 'markdown' | 'csv' = 'json') {
+  exportGroups(groupIds: string[], format: 'json' | 'markdown' = 'json') {
     return this.transferService.exportGroups(groupIds, format);
   }
 
