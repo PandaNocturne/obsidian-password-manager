@@ -61,6 +61,7 @@ export class PasswordTransferService {
       this.context.data.groups,
       this.context.data.items,
       this.context.pluginConfig.autoExportMarkdownFormat,
+      this.context.pluginConfig.exportEmptyGroups,
     );
     const existingContent = await this.app.vault.read(file);
     const content = this.mergeMarkdownBodyPreservingFrontmatter(existingContent, body);
@@ -92,6 +93,7 @@ export class PasswordTransferService {
       this.context.data.groups,
       this.context.data.items,
       this.context.pluginConfig.autoExportMarkdownFormat,
+      this.context.pluginConfig.exportEmptyGroups,
     );
     return this.app.vault.create(path, initialContent);
   }

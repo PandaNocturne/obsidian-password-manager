@@ -475,9 +475,19 @@ export function downloadMarkdownGroup(filename: string, group: PasswordGroup, it
   downloadText(filename, formatGroupedMarkdown(group.name, items, format), 'text/markdown;charset=utf-8');
 }
 
-export function exportLibraryToMarkdown(groups: PasswordGroup[], items: PasswordItem[], format: PasswordCopyFormat) {
+export function exportLibraryToMarkdown(
+  groups: PasswordGroup[],
+  items: PasswordItem[],
+  format: PasswordCopyFormat,
+  exportEmptyGroups: boolean,
+) {
   return groups
-    .map((group) => formatGroupedMarkdown(group.name, items.filter((item) => item.groupIds.includes(group.id)), format))
+    .map((group) => ({
+      group,
+      groupItems: items.filter((item) => item.groupIds.includes(group.id)),
+    }))
+    .filter(({ groupItems }) => exportEmptyGroups || groupItems.length > 0)
+    .map(({ group, groupItems }) => formatGroupedMarkdown(group.name, groupItems, format))
     .filter(Boolean)
     .join('\n\n');
 }

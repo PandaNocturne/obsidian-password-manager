@@ -51,6 +51,8 @@ export const PWM_TEXT = {
   AUTO_EXPORT_MARKDOWN_FILE_SETTING_DESC: 'Select a Markdown file in the vault as the full-library export target.',
   AUTO_EXPORT_MARKDOWN_FORMAT_SETTING: 'Export format',
   AUTO_EXPORT_MARKDOWN_FORMAT_SETTING_DESC: 'Choose whether Markdown exports use heading mode or callout mode.',
+  EXPORT_EMPTY_GROUPS_SETTING: 'Export empty groups',
+  EXPORT_EMPTY_GROUPS_SETTING_DESC: 'When disabled, groups without any items are skipped during Markdown export.',
   SELECT_MARKDOWN_FILE: 'Select Markdown file',
   CLEAR_MARKDOWN_FILE: 'Clear export file',
   OPEN_MARKDOWN_FILE: 'Open Markdown file',

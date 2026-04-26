@@ -51,6 +51,8 @@ export const PWM_TEXT = {
   AUTO_EXPORT_MARKDOWN_FILE_SETTING_DESC: '选择库内一个 Markdown 文档作为全库导出目标。',
   AUTO_EXPORT_MARKDOWN_FORMAT_SETTING: '导出格式',
   AUTO_EXPORT_MARKDOWN_FORMAT_SETTING_DESC: '设置导出 Markdown 时使用标题模式还是 Callout 模式。',
+  EXPORT_EMPTY_GROUPS_SETTING: '导出空白组',
+  EXPORT_EMPTY_GROUPS_SETTING_DESC: '关闭后，Markdown 导出会跳过没有任何条目的分组。',
   SELECT_MARKDOWN_FILE: '选择 Markdown 文档',
   CLEAR_MARKDOWN_FILE: '清空导出文档',
   OPEN_MARKDOWN_FILE: '打开 Markdown 文档',

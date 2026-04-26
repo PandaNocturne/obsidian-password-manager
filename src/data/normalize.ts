@@ -204,6 +204,10 @@ export function normalizePluginConfig(config: unknown): PasswordPluginConfig {
         ? source.autoExportMarkdownFilePath.trim()
         : '',
     autoExportMarkdownFormat: normalizeCopyFormat(source?.autoExportMarkdownFormat),
+    exportEmptyGroups:
+      typeof source?.exportEmptyGroups === 'boolean'
+        ? source.exportEmptyGroups
+        : true,
     encryptionEnabled:
       typeof source?.encryptionEnabled === 'boolean'
         ? source.encryptionEnabled
