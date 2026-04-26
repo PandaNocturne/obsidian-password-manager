@@ -1,11 +1,10 @@
 {
-	"id": "sample-plugin",
-	"name": "Sample Plugin",
-	"version": "1.0.0",
+	"id": "password-manager",
+	"name": "Password Manager",
+	"version": "1.0.3",
 	"minAppVersion": "0.15.0",
-	"description": "Demonstrates some of the capabilities of the Obsidian API.",
-	"author": "Obsidian",
-	"authorUrl": "https://obsidian.md",
-	"fundingUrl": "https://obsidian.md/pricing",
-	"isDesktopOnly": false
+	"description": "A lightweight local password manager for Obsidian with encryption, backup, trash, and import/export support.",
+	"author": "PandaNocturne",
+	"authorUrl": "https://github.com/PandaNocturne",
+	"isDesktopOnly": true
 }
