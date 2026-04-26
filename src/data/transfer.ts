@@ -191,7 +191,7 @@ function formatGroupedMarkdown(groupName: string, items: PasswordItem[]) {
   const itemBlocks = items.map((item) => buildMarkdownItemLines(item, 3));
   return [
     `## ${escapeMarkdownValue(groupName) || PWM_TEXT.UNTITLED_GROUP}`,
-    '',
+    // '',
     ...itemBlocks,
   ].join('\n\n');
 }
