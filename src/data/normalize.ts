@@ -203,6 +203,7 @@ export function normalizePluginConfig(config: unknown): PasswordPluginConfig {
       typeof source?.autoExportMarkdownFilePath === 'string'
         ? source.autoExportMarkdownFilePath.trim()
         : '',
+    autoExportMarkdownFormat: normalizeCopyFormat(source?.autoExportMarkdownFormat),
     encryptionEnabled:
       typeof source?.encryptionEnabled === 'boolean'
         ? source.encryptionEnabled

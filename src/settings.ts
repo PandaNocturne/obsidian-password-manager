@@ -23,6 +23,7 @@ export interface PasswordPluginConfig {
   lastAutoBackupAt: number;
   autoExportMarkdownEnabled: boolean;
   autoExportMarkdownFilePath: string;
+  autoExportMarkdownFormat: PasswordCopyFormat;
   encryptionEnabled: boolean;
   encryptionUnlockMode: PasswordUnlockMode;
   encryptionRecheckIntervalMinutes: number;
@@ -53,6 +54,7 @@ export const DEFAULT_PASSWORD_PLUGIN_CONFIG: PasswordPluginConfig = {
   lastAutoBackupAt: 0,
   autoExportMarkdownEnabled: false,
   autoExportMarkdownFilePath: '',
+  autoExportMarkdownFormat: 'markdown',
   encryptionEnabled: false,
   encryptionUnlockMode: 'session',
   encryptionRecheckIntervalMinutes: 30,
@@ -179,6 +181,21 @@ export class PasswordManagerSettingTab extends PluginSettingTab {
           }).open();
         });
       });
+
+    new Setting(containerEl)
+      .setName(PWM_TEXT.AUTO_EXPORT_MARKDOWN_FORMAT_SETTING)
+      .setDesc(PWM_TEXT.AUTO_EXPORT_MARKDOWN_FORMAT_SETTING_DESC)
+      .addDropdown((dropdown) =>
+        dropdown
+          .addOption('markdown', PWM_TEXT.COPY_FORMAT_MARKDOWN)
+          .addOption('callout', PWM_TEXT.COPY_FORMAT_CALLOUT)
+          .setValue(this.plugin.pluginConfig.autoExportMarkdownFormat)
+          .onChange(async (value: PasswordCopyFormat) => {
+            this.plugin.updatePluginConfig({ autoExportMarkdownFormat: value });
+            await this.plugin.savePluginConfig();
+            await this.plugin.syncLibraryMarkdownExport();
+          }),
+      );
 
     new Setting(containerEl)
       .setName(PWM_TEXT.MODAL_SETTINGS_TITLE)

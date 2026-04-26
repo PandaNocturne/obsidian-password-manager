@@ -53,7 +53,11 @@ export class PasswordTransferService {
       return null;
     }
 
-    const body = exportLibraryToMarkdown(this.context.data.groups, this.context.data.items);
+    const body = exportLibraryToMarkdown(
+      this.context.data.groups,
+      this.context.data.items,
+      this.context.pluginConfig.autoExportMarkdownFormat,
+    );
     const existingContent = await this.app.vault.read(file);
     const content = this.mergeMarkdownBodyPreservingFrontmatter(existingContent, body);
     await this.app.vault.modify(file, content);
@@ -76,7 +80,11 @@ export class PasswordTransferService {
     }
 
     await this.ensureParentFolders(path);
-    const initialContent = exportLibraryToMarkdown(this.context.data.groups, this.context.data.items);
+    const initialContent = exportLibraryToMarkdown(
+      this.context.data.groups,
+      this.context.data.items,
+      this.context.pluginConfig.autoExportMarkdownFormat,
+    );
     return this.app.vault.create(path, initialContent);
   }
 
@@ -109,7 +117,12 @@ export class PasswordTransferService {
     const exportedAt = Date.now();
     const items = this.context.getItemsByGroup(groupId);
     if (format === 'markdown') {
-      downloadMarkdownGroup(appendDateTimeSuffix(`${group.name || 'group'}.md`, exportedAt), group, items);
+      downloadMarkdownGroup(
+        appendDateTimeSuffix(`${group.name || 'group'}.md`, exportedAt),
+        group,
+        items,
+        this.context.pluginConfig.autoExportMarkdownFormat,
+      );
     } else {
       downloadJson(appendDateTimeSuffix(`${group.name || 'group'}.json`, exportedAt), {
         version: 1,
@@ -146,7 +159,11 @@ export class PasswordTransferService {
 
     const exportedAt = Date.now();
     if (format === 'markdown') {
-      downloadMarkdownGroups(appendDateTimeSuffix('export-groups.md', exportedAt), groupsWithItems);
+      downloadMarkdownGroups(
+        appendDateTimeSuffix('export-groups.md', exportedAt),
+        groupsWithItems,
+        this.context.pluginConfig.autoExportMarkdownFormat,
+      );
     } else {
       downloadJson(appendDateTimeSuffix('export-groups.json', exportedAt), {
         version: 1,
@@ -187,7 +204,12 @@ export class PasswordTransferService {
 
     const exportedAt = Date.now();
     if (format === 'markdown') {
-      downloadMarkdownItems(appendDateTimeSuffix('export-items.md', exportedAt), items, this.context.data.groups);
+      downloadMarkdownItems(
+        appendDateTimeSuffix('export-items.md', exportedAt),
+        items,
+        this.context.data.groups,
+        this.context.pluginConfig.autoExportMarkdownFormat,
+      );
     } else {
       downloadJson(appendDateTimeSuffix('export-items.json', exportedAt), {
         version: 1,

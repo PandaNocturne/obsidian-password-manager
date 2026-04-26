@@ -1,5 +1,5 @@
 import { PWM_TEXT } from '../lang';
-import type { PasswordGroup, PasswordItem, PasswordManagerData, PasswordManagerExportPayload } from '../util/types';
+import type { PasswordCopyFormat, PasswordGroup, PasswordItem, PasswordManagerData, PasswordManagerExportPayload } from '../util/types';
 
 interface ParsedMarkdownGroup {
   groupName: string;
@@ -92,6 +92,17 @@ function formatMarkdownUrls(item: Pick<PasswordItem, 'urls'> & { url?: string })
   return `\n${urls.map((url) => `    - ${wrapMarkdownLink(url)}`).join('\n')}`;
 }
 
+function formatCalloutUrls(item: Pick<PasswordItem, 'urls'> & { url?: string }) {
+  const urls = item.urls.length ? item.urls : (item.url ? [item.url] : []);
+  if (!urls.length) {
+    return '';
+  }
+  if (urls.length === 1) {
+    return wrapMarkdownLink(urls[0] ?? '');
+  }
+  return `\n${urls.map((url) => `>   - ${wrapMarkdownLink(url)}`).join('\n')}`;
+}
+
 function formatMarkdownIndentedValue(value: string) {
   const normalized = escapeMarkdownValue(value);
   if (!normalized) {
@@ -99,6 +110,15 @@ function formatMarkdownIndentedValue(value: string) {
   }
 
   return `\n${normalized.split('\n').map((line) => `    ${line}`).join('\n')}`;
+}
+
+function formatCalloutIndentedValue(value: string) {
+  const normalized = escapeMarkdownValue(value);
+  if (!normalized) {
+    return '';
+  }
+
+  return `\n${normalized.split('\n').map((line) => `>     ${line}`).join('\n')}`;
 }
 
 function unwrapMarkdownValue(value: string) {
@@ -175,10 +195,22 @@ function getJoinedUrls(item: Pick<PasswordItem, 'urls'> & { url?: string }) {
   return (item.urls.length ? item.urls : (item.url ? [item.url] : [])).join('\n');
 }
 
-function buildMarkdownItemLines(item: PasswordItem, headingLevel: 2 | 3) {
+function buildMarkdownItemLines(item: PasswordItem, headingLevel: 2 | 3, format: PasswordCopyFormat) {
   const headingPrefix = '#'.repeat(headingLevel);
+  const title = escapeMarkdownValue(item.title) || PWM_TEXT.UNTITLED_ITEM;
+
+  if (format === 'callout') {
+    return [
+      `> [!info] ${title}`,
+      `> - ${getMarkdownFieldLabel('username')}：${wrapInlineCode(item.username)}`,
+      `> - ${getMarkdownFieldLabel('password')}：${wrapInlineCode(item.password)}`,
+      `> - ${getMarkdownFieldLabel('url')}：${formatCalloutUrls(item)}`,
+      `> - ${getMarkdownFieldLabel('notes')}：${formatCalloutIndentedValue(item.notes)}`,
+    ].join('\n');
+  }
+
   return [
-    `${headingPrefix} ${escapeMarkdownValue(item.title) || PWM_TEXT.UNTITLED_ITEM}`,
+    `${headingPrefix} ${title}`,
     '',
     `- ${getMarkdownFieldLabel('username')}：${wrapInlineCode(item.username)}`,
     `- ${getMarkdownFieldLabel('password')}：${wrapInlineCode(item.password)}`,
@@ -187,11 +219,10 @@ function buildMarkdownItemLines(item: PasswordItem, headingLevel: 2 | 3) {
   ].join('\n');
 }
 
-function formatGroupedMarkdown(groupName: string, items: PasswordItem[]) {
-  const itemBlocks = items.map((item) => buildMarkdownItemLines(item, 3));
+function formatGroupedMarkdown(groupName: string, items: PasswordItem[], format: PasswordCopyFormat) {
+  const itemBlocks = items.map((item) => buildMarkdownItemLines(item, 3, format));
   return [
     `## ${escapeMarkdownValue(groupName) || PWM_TEXT.UNTITLED_GROUP}`,
-    // '',
     ...itemBlocks,
   ].join('\n\n');
 }
@@ -413,31 +444,40 @@ export function downloadJson(filename: string, payload: PasswordManagerExportPay
   downloadText(filename, JSON.stringify(payload, null, 2), 'application/json');
 }
 
-export function downloadMarkdownItems(filename: string, items: PasswordItem[], groups: PasswordGroup[]) {
+export function downloadMarkdownItems(
+  filename: string,
+  items: PasswordItem[],
+  groups: PasswordGroup[],
+  format: PasswordCopyFormat,
+) {
   const groupedContent = groups
     .filter((group) => items.some((item) => item.groupIds.includes(group.id)))
-    .map((group) => formatGroupedMarkdown(group.name, items.filter((item) => item.groupIds.includes(group.id))))
+    .map((group) => formatGroupedMarkdown(group.name, items.filter((item) => item.groupIds.includes(group.id)), format))
     .join('\n\n');
 
   downloadText(filename, groupedContent, 'text/markdown;charset=utf-8');
 }
 
-export function downloadMarkdownGroups(filename: string, groupsWithItems: Array<{ group: PasswordGroup; items: PasswordItem[] }>) {
+export function downloadMarkdownGroups(
+  filename: string,
+  groupsWithItems: Array<{ group: PasswordGroup; items: PasswordItem[] }>,
+  format: PasswordCopyFormat,
+) {
   const content = groupsWithItems
     .filter(({ items }) => items.length > 0)
-    .map(({ group, items }) => formatGroupedMarkdown(group.name, items))
+    .map(({ group, items }) => formatGroupedMarkdown(group.name, items, format))
     .join('\n\n');
 
   downloadText(filename, content, 'text/markdown;charset=utf-8');
 }
 
-export function downloadMarkdownGroup(filename: string, group: PasswordGroup, items: PasswordItem[]) {
-  downloadText(filename, formatGroupedMarkdown(group.name, items), 'text/markdown;charset=utf-8');
+export function downloadMarkdownGroup(filename: string, group: PasswordGroup, items: PasswordItem[], format: PasswordCopyFormat) {
+  downloadText(filename, formatGroupedMarkdown(group.name, items, format), 'text/markdown;charset=utf-8');
 }
 
-export function exportLibraryToMarkdown(groups: PasswordGroup[], items: PasswordItem[]) {
+export function exportLibraryToMarkdown(groups: PasswordGroup[], items: PasswordItem[], format: PasswordCopyFormat) {
   return groups
-    .map((group) => formatGroupedMarkdown(group.name, items.filter((item) => item.groupIds.includes(group.id))))
+    .map((group) => formatGroupedMarkdown(group.name, items.filter((item) => item.groupIds.includes(group.id)), format))
     .filter(Boolean)
     .join('\n\n');
 }
