@@ -174,7 +174,7 @@ export class PasswordTransferService {
     }
   }
 
-  async importGroupFromText(text: string) {
+  importGroupFromText(text: string) {
     try {
       return importGroupFromText(text, this.context.data);
     } catch {
@@ -182,7 +182,7 @@ export class PasswordTransferService {
     }
   }
 
-  async importItemFromText(text: string, groupId: string) {
+  importItemFromText(text: string, groupId: string) {
     try {
       return importItemFromText(text, this.context.data, groupId);
     } catch {
@@ -190,7 +190,7 @@ export class PasswordTransferService {
     }
   }
 
-  async importItemsFromText(text: string, groupId: string) {
+  importItemsFromText(text: string, groupId: string) {
     try {
       return importItemsFromText(text, this.context.data, groupId);
     } catch {

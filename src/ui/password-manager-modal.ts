@@ -756,7 +756,7 @@ export class PasswordManagerModal extends Modal {
         this.resetItemSelection(this.selectedItemId);
       }, 'application/json,text/markdown,text/plain,text/csv,.json,.md,.markdown,.txt,.csv');
     });
-    const exportGroupButton = this.plugin.createIconButton(footer, 'folder-up', PWM_TEXT.EXPORT_GROUP, async () => { });
+    const exportGroupButton = this.plugin.createIconButton(footer, 'folder-up', PWM_TEXT.EXPORT_GROUP, () => { });
     exportGroupButton.addEventListener('click', (event) => {
       event.preventDefault();
       event.stopPropagation();
@@ -975,7 +975,7 @@ export class PasswordManagerModal extends Modal {
         }
       }, 'application/json,text/markdown,text/plain,.json,.md,.markdown,.txt');
     });
-    const exportSelectedItemsButton = this.plugin.createIconButton(footer, 'file-up', PWM_TEXT.EXPORT_SELECTED_ITEMS, async () => { });
+    const exportSelectedItemsButton = this.plugin.createIconButton(footer, 'file-up', PWM_TEXT.EXPORT_SELECTED_ITEMS, () => undefined);
     exportSelectedItemsButton.addEventListener('click', (event) => {
       event.preventDefault();
       event.stopPropagation();
@@ -1596,7 +1596,7 @@ export class PasswordManagerModal extends Modal {
     if (!currentOption) {
       return;
     }
-    const button = this.plugin.createIconButton(container, SORT_MENU_ICON, `${label}: ${currentOption.label}`, async () => { });
+    const button = this.plugin.createIconButton(container, SORT_MENU_ICON, `${label}: ${currentOption.label}`, () => { });
     button.addEventListener('click', (event) => {
       event.preventDefault();
       event.stopPropagation();
@@ -1620,7 +1620,7 @@ export class PasswordManagerModal extends Modal {
   }
 
   private createDisplayMenuButton(container: HTMLElement) {
-    const button = this.plugin.createIconButton(container, 'info', PWM_TEXT.ITEM_DISPLAY_SETTING, async () => { });
+    const button = this.plugin.createIconButton(container, 'info', PWM_TEXT.ITEM_DISPLAY_SETTING, () => { });
     button.addEventListener('click', (event) => {
       event.preventDefault();
       event.stopPropagation();
@@ -2009,7 +2009,7 @@ export class PasswordManagerModal extends Modal {
     });
   }
 
-  private async handleImport(importer: (text: string) => Promise<void>, accept = 'application/json,.json') {
+  private handleImport(importer: (text: string) => Promise<void>, accept = 'application/json,.json') {
     const input = document.createElement('input');
     input.type = 'file';
     input.accept = accept;

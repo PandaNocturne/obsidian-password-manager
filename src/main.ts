@@ -70,7 +70,7 @@ export default class PasswordManagerPlugin extends Plugin {
     new PasswordManagerModal(this.app, this).open();
   }
 
-  async openTrash() {
+  openTrash() {
     new PasswordManagerModal(this.app, this, { mode: 'trash' }).open();
   }
 
@@ -165,15 +165,15 @@ export default class PasswordManagerPlugin extends Plugin {
     return this.transferService.importLibraryFromText(text);
   }
 
-  async importGroupFromText(text: string) {
+  importGroupFromText(text: string) {
     return this.transferService.importGroupFromText(text);
   }
 
-  async importItemFromText(text: string, groupId: string) {
+  importItemFromText(text: string, groupId: string) {
     return this.transferService.importItemFromText(text, groupId);
   }
 
-  async importItemsFromText(text: string, groupId: string) {
+  importItemsFromText(text: string, groupId: string) {
     return this.transferService.importItemsFromText(text, groupId);
   }
 
@@ -225,7 +225,7 @@ export default class PasswordManagerPlugin extends Plugin {
     return this.context.deleteGroups(groupIds);
   }
 
-  async deleteItem(itemId: string) {
+  deleteItem(itemId: string) {
     return this.context.deleteItem(itemId);
   }
 

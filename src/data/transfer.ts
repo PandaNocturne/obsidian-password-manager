@@ -318,11 +318,11 @@ export function downloadText(filename: string, content: string, mimeType: string
   URL.revokeObjectURL(url);
 }
 
-export async function downloadJson(filename: string, payload: PasswordManagerExportPayload) {
+export function downloadJson(filename: string, payload: PasswordManagerExportPayload) {
   downloadText(filename, JSON.stringify(payload, null, 2), 'application/json');
 }
 
-export async function downloadMarkdownItems(filename: string, items: PasswordItem[], groups: PasswordGroup[]) {
+export function downloadMarkdownItems(filename: string, items: PasswordItem[], groups: PasswordGroup[]) {
   const groupedContent = groups
     .filter((group) => items.some((item) => item.groupIds.includes(group.id)))
     .map((group) => formatGroupedMarkdown(group.name, items.filter((item) => item.groupIds.includes(group.id))))
@@ -331,7 +331,7 @@ export async function downloadMarkdownItems(filename: string, items: PasswordIte
   downloadText(filename, groupedContent, 'text/markdown;charset=utf-8');
 }
 
-export async function downloadMarkdownGroups(filename: string, groupsWithItems: Array<{ group: PasswordGroup; items: PasswordItem[] }>) {
+export function downloadMarkdownGroups(filename: string, groupsWithItems: Array<{ group: PasswordGroup; items: PasswordItem[] }>) {
   const content = groupsWithItems
     .filter(({ items }) => items.length > 0)
     .map(({ group, items }) => formatGroupedMarkdown(group.name, items))
@@ -340,11 +340,11 @@ export async function downloadMarkdownGroups(filename: string, groupsWithItems: 
   downloadText(filename, content, 'text/markdown;charset=utf-8');
 }
 
-export async function downloadMarkdownGroup(filename: string, group: PasswordGroup, items: PasswordItem[]) {
+export function downloadMarkdownGroup(filename: string, group: PasswordGroup, items: PasswordItem[]) {
   downloadText(filename, formatGroupedMarkdown(group.name, items), 'text/markdown;charset=utf-8');
 }
 
-export async function downloadCsvGroups(filename: string, groupsWithItems: Array<{ group: PasswordGroup; items: PasswordItem[] }>) {
+export function downloadCsvGroups(filename: string, groupsWithItems: Array<{ group: PasswordGroup; items: PasswordItem[] }>) {
   const header = ['group', 'title', 'username', 'password', 'url', 'notes', 'pinned', 'createdAt'];
   const rows = groupsWithItems.flatMap(({ group, items }) => items.map((item) => [
     group.name,
@@ -360,7 +360,7 @@ export async function downloadCsvGroups(filename: string, groupsWithItems: Array
   downloadText(filename, [header.join(','), ...rows].join('\n'), 'text/csv;charset=utf-8');
 }
 
-export async function downloadCsvGroup(filename: string, group: PasswordGroup, items: PasswordItem[]) {
+export function downloadCsvGroup(filename: string, group: PasswordGroup, items: PasswordItem[]) {
   const header = ['group', 'title', 'username', 'password', 'url', 'notes', 'pinned', 'createdAt'];
   const rows = items.map((item) => [
     group.name,

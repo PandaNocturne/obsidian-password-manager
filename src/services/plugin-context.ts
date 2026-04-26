@@ -45,7 +45,7 @@ export class PasswordPluginContext {
   private lastVerifiedAt = 0;
   private hasEncryptedStorage = false;
   private hasUnlockedData = true;
-  private ensureEncryptionWriteAccess: () => Promise<boolean> = async () => true;
+  private ensureEncryptionWriteAccess: () => Promise<boolean> = () => Promise.resolve(true);
 
   constructor(
     private readonly storageStore: PasswordStorageStore,
@@ -283,7 +283,7 @@ export class PasswordPluginContext {
     return changed;
   }
 
-  async deleteItem(itemId: string) {
+  deleteItem(itemId: string) {
     const item = this.getItem(itemId);
     if (!item) {
       return false;
