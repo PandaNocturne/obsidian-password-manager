@@ -9,22 +9,6 @@ const COPY_FIELD_LABELS = {
   notes: PWM_TEXT.COPY_FIELD_NOTES,
 } as const;
 
-type ParsedCopyItem = {
-  title?: string;
-  username?: string;
-  password?: string;
-  url?: string;
-  notes?: string;
-};
-
-const COPY_FIELD_KEY_BY_LABEL: Record<string, keyof ParsedCopyItem> = {
-  [COPY_FIELD_LABELS.title]: 'title',
-  [COPY_FIELD_LABELS.username]: 'username',
-  [COPY_FIELD_LABELS.password]: 'password',
-  [COPY_FIELD_LABELS.url]: 'url',
-  [COPY_FIELD_LABELS.notes]: 'notes',
-};
-
 function formatLine(label: string, value: string) {
   return `${label}：${value.trim()}`;
 }
@@ -39,30 +23,25 @@ function wrapMarkdownLink(value: string) {
   return normalized ? `<${normalized}>` : '';
 }
 
-function unwrapMarkdownValue(value: string) {
-  const normalized = value.trim();
-  if (!normalized) {
+function formatUrls(urls: string[]) {
+  return urls.map((url) => url.trim()).filter(Boolean);
+}
+
+function formatUrlsForPlainText(urls: string[]) {
+  return formatUrls(urls).join(' | ');
+}
+
+function formatUrlsForStructuredText(urls: string[]) {
+  const normalizedUrls = formatUrls(urls);
+  if (!normalizedUrls.length) {
     return '';
   }
 
-  if (normalized.startsWith('`') && normalized.endsWith('`')) {
-    return normalized.slice(1, -1).trim();
+  if (normalizedUrls.length === 1) {
+    return wrapMarkdownLink(normalizedUrls[0] ?? '');
   }
 
-  if (normalized.startsWith('<') && normalized.endsWith('>')) {
-    return normalized.slice(1, -1).trim();
-  }
-
-  return normalized;
-}
-
-function applyParsedCopyField(parsed: ParsedCopyItem, label: string, value: string) {
-  const fieldKey = COPY_FIELD_KEY_BY_LABEL[label.trim()];
-  if (!fieldKey) {
-    return;
-  }
-
-  parsed[fieldKey] = unwrapMarkdownValue(value);
+  return normalizedUrls.map((url) => `\n  - ${wrapMarkdownLink(url)}`).join('');
 }
 
 function getGroupNames(item: PasswordItem, groups: PasswordGroup[]) {
@@ -78,7 +57,7 @@ export function formatPasswordItemForCopy(
   const title = item.title.trim();
   const username = item.username.trim();
   const password = item.password.trim();
-  const url = (item.urls[0] ?? '').trim();
+  const urls = formatUrls(item.urls);
   const notes = item.notes.trim();
   void getGroupNames(item, groups);
 
@@ -88,7 +67,7 @@ export function formatPasswordItemForCopy(
         formatLine(COPY_FIELD_LABELS.title, title),
         formatLine(COPY_FIELD_LABELS.username, username),
         formatLine(COPY_FIELD_LABELS.password, password),
-        formatLine(COPY_FIELD_LABELS.url, url),
+        formatLine(COPY_FIELD_LABELS.url, formatUrlsForPlainText(urls)),
         formatLine(COPY_FIELD_LABELS.notes, notes),
       ].join('\n');
     case 'callout':
@@ -96,7 +75,7 @@ export function formatPasswordItemForCopy(
         `> [!info] ${title}`,
         `> ${COPY_FIELD_LABELS.username}：${wrapInlineCode(username)}`,
         `> ${COPY_FIELD_LABELS.password}：${wrapInlineCode(password)}`,
-        `> ${COPY_FIELD_LABELS.url}：${wrapMarkdownLink(url)}`,
+        `> ${COPY_FIELD_LABELS.url}：${formatUrlsForStructuredText(urls)}`,
         `> ${COPY_FIELD_LABELS.notes}：${notes}`,
       ].join('\n');
     case 'markdown':
@@ -106,47 +85,8 @@ export function formatPasswordItemForCopy(
         '',
         `- ${COPY_FIELD_LABELS.username}：${wrapInlineCode(username)}`,
         `- ${COPY_FIELD_LABELS.password}：${wrapInlineCode(password)}`,
-        `- ${COPY_FIELD_LABELS.url}：${wrapMarkdownLink(url)}`,
+        `- ${COPY_FIELD_LABELS.url}：${formatUrlsForStructuredText(urls)}`,
         `- ${COPY_FIELD_LABELS.notes}：${notes}`,
       ].join('\n');
   }
-}
-
-export function parsePasswordItemFromCopy(text: string) {
-  const normalizedText = text.replace(/\r\n/g, '\n').trim();
-  const parsed: ParsedCopyItem = {};
-  if (!normalizedText) {
-    return parsed;
-  }
-
-  const lines = normalizedText.split('\n').map((line) => line.trim()).filter(Boolean);
-  for (const line of lines) {
-    if (line.startsWith('### ')) {
-      parsed.title = line.slice(4).trim();
-      continue;
-    }
-
-    if (line.startsWith('## ')) {
-      parsed.title = line.slice(3).trim();
-      continue;
-    }
-
-    const calloutTitleMatch = line.match(/^>\s*\[!info\]\s*(.*)$/);
-    if (calloutTitleMatch) {
-      parsed.title = (calloutTitleMatch[1] ?? '').trim();
-      continue;
-    }
-
-    const fieldLine = line.replace(/^>\s*/, '').replace(/^-\s+/, '');
-    const separatorIndex = fieldLine.indexOf('：');
-    if (separatorIndex === -1) {
-      continue;
-    }
-
-    const label = fieldLine.slice(0, separatorIndex);
-    const value = fieldLine.slice(separatorIndex + 1);
-    applyParsedCopyField(parsed, label, value);
-  }
-
-  return parsed;
 }

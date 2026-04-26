@@ -81,6 +81,17 @@ function wrapMarkdownLink(value: string) {
   return normalized ? `<${normalized}>` : '';
 }
 
+function formatMarkdownUrls(item: Pick<PasswordItem, 'urls'> & { url?: string }) {
+  const urls = item.urls.length ? item.urls : (item.url ? [item.url] : []);
+  if (!urls.length) {
+    return '';
+  }
+  if (urls.length === 1) {
+    return wrapMarkdownLink(urls[0] ?? '');
+  }
+  return `\n${urls.map((url) => `  - ${wrapMarkdownLink(url)}`).join('\n')}`;
+}
+
 function unwrapMarkdownValue(value: string) {
   return value.trim().replace(/^`([^`]*)`$/, '$1').replace(/^<([^>]+)>$/, '$1').trim();
 }
@@ -162,7 +173,7 @@ function buildMarkdownItemLines(item: PasswordItem, headingLevel: 2 | 3) {
     '',
     `- ${getMarkdownFieldLabel('username')}：${wrapInlineCode(item.username)}`,
     `- ${getMarkdownFieldLabel('password')}：${wrapInlineCode(item.password)}`,
-    `- ${getMarkdownFieldLabel('url')}：${wrapMarkdownLink(getPrimaryUrl(item))}`,
+    `- ${getMarkdownFieldLabel('url')}：${formatMarkdownUrls(item)}`,
     `- ${getMarkdownFieldLabel('notes')}：${escapeMarkdownValue(item.notes)}`,
   ].join('\n');
 }
@@ -174,6 +185,26 @@ function formatGroupedMarkdown(groupName: string, items: PasswordItem[]) {
     '',
     ...itemBlocks,
   ].join('\n\n');
+}
+
+function parseMarkdownUrlList(lines: string[], startIndex: number) {
+  const urls: string[] = [];
+  let nextIndex = startIndex;
+
+  while (nextIndex < lines.length) {
+    const line = lines[nextIndex] ?? '';
+    const match = line.match(/^\s*-\s+(.*)$/);
+    if (!match) {
+      break;
+    }
+    const value = unwrapMarkdownValue(match[1] ?? '');
+    if (value) {
+      urls.push(value);
+    }
+    nextIndex += 1;
+  }
+
+  return { urls, nextIndex };
 }
 
 function parseGroupedMarkdownGroups(text: string): ParsedMarkdownGroup[] {
@@ -196,53 +227,63 @@ function parseGroupedMarkdownGroups(text: string): ParsedMarkdownGroup[] {
     ensureGroup().items.push(currentItem);
   };
 
-  lines.forEach((line) => {
+  for (let index = 0; index < lines.length; index += 1) {
+    const line = lines[index] ?? '';
+
     if (line.startsWith('## ')) {
       currentGroup = { groupName: line.slice(3).trim(), items: [] };
       groups.push(currentGroup);
       currentItem = null;
-      return;
+      continue;
     }
 
     if (line.startsWith('### ')) {
       startItem(line.slice(4).trim());
-      return;
+      continue;
     }
 
     if (!currentItem) {
-      return;
+      continue;
     }
+    const itemRef: Partial<PasswordItem> = currentItem;
 
     const match = line.match(/^-\s*([^：:]+)[：:](.*)$/);
     if (!match) {
-      return;
+      continue;
     }
 
     const rawLabel = match[1] ?? '';
     const rawValue = match[2] ?? '';
     const field = parseMarkdownFieldLabel(rawLabel);
     if (!field) {
-      return;
+      continue;
     }
 
     const value = unwrapMarkdownValue(rawValue);
     switch (field) {
       case 'username':
-        currentItem.username = value;
+        itemRef.username = value;
         break;
       case 'password':
-        currentItem.password = value;
+        itemRef.password = value;
         break;
-      case 'url':
-        currentItem.urls = value ? [value] : [];
+      case 'url': {
+        if (value) {
+          itemRef.urls = [value];
+          break;
+        }
+        const { urls, nextIndex } = parseMarkdownUrlList(lines, index + 1);
+        itemRef.urls = urls;
+        index = nextIndex - 1;
         break;
+      }
       case 'notes':
-        currentItem.notes = value;
+        itemRef.notes = value;
         break;
       default:
         break;
     }
-  });
+  }
 
   return groups.filter((group) => group.items.length > 0 || group.groupName);
 }
@@ -268,17 +309,18 @@ function parseFlatMarkdownItems(text: string) {
         : heading.slice(3).trim();
     const item = createEmptyImportedItem(title);
 
-    lines.forEach((line) => {
+    for (let index = 0; index < lines.length; index += 1) {
+      const line = lines[index] ?? '';
       const match = line.match(/^-\s*([^：:]+)[：:](.*)$/);
       if (!match) {
-        return;
+        continue;
       }
 
       const rawLabel = match[1] ?? '';
       const rawValue = match[2] ?? '';
       const field = parseMarkdownFieldLabel(rawLabel);
       if (!field) {
-        return;
+        continue;
       }
 
       const value = unwrapMarkdownValue(rawValue);
@@ -289,16 +331,23 @@ function parseFlatMarkdownItems(text: string) {
         case 'password':
           item.password = value;
           break;
-        case 'url':
-          item.urls = value ? [value] : [];
+        case 'url': {
+          if (value) {
+            item.urls = [value];
+            break;
+          }
+          const { urls, nextIndex } = parseMarkdownUrlList(lines, index + 1);
+          item.urls = urls;
+          index = nextIndex - 1;
           break;
+        }
         case 'notes':
           item.notes = value;
           break;
         default:
           break;
       }
-    });
+    }
 
     return item;
   });

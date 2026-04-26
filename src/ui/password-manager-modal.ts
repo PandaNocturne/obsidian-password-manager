@@ -2,7 +2,6 @@ import { App, Menu, Modal, Notice, Scope, setIcon } from 'obsidian';
 import type PasswordManagerPlugin from '../main';
 import { PWM_TEXT, formatPWMText } from '../lang';
 import { includesKeyword, normalizeSearchKeyword } from '../util/search';
-import { parsePasswordItemFromCopy } from '../util/copy-format';
 import type { DeletedPasswordItem, PasswordGroup, PasswordItem, PwmFieldAction, PwmSortMode, PwmTextFieldOptions } from '../util/types';
 
 function setCssProps(element: HTMLElement, styles: Record<string, string>) {
@@ -83,7 +82,6 @@ export class PasswordManagerModal extends Modal {
   };
   private detailInputs: Partial<Record<'title' | 'username' | 'password' | 'notes', HTMLInputElement | HTMLTextAreaElement>> = {};
   private detailUrlInputs: HTMLInputElement[] = [];
-  private focusedDetailInput: HTMLInputElement | HTMLTextAreaElement | null = null;
   private isSavingDetails = false;
 
   constructor(
@@ -1002,11 +1000,6 @@ export class PasswordManagerModal extends Modal {
     const header = container.createDiv({ cls: 'pwm-header' });
     header.createEl('h3', { text: PWM_TEXT.DETAILS });
     const actions = header.createDiv({ cls: 'pwm-actions' });
-    if (!this.isTrashMode()) {
-      this.plugin.createIconButton(actions, 'clipboard-paste', PWM_TEXT.PASTE_INTO_FOCUSED_FIELD, async () => {
-        await this.pasteIntoFocusedField();
-      });
-    }
     this.plugin.createIconButton(actions, 'copy', PWM_TEXT.COPY_PASSWORD_INFO, async () => {
       if (!this.selectedItemId) {
         return;
@@ -1029,7 +1022,6 @@ export class PasswordManagerModal extends Modal {
     if (!item) {
       this.detailsDraftItemId = '';
       this.detailInputs = {};
-      this.focusedDetailInput = null;
       detail.createDiv({ text: PWM_TEXT.NO_ITEM, cls: 'pwm-empty' });
       this.renderDetailsBottomToolbar(body);
       return;
@@ -1392,11 +1384,6 @@ export class PasswordManagerModal extends Modal {
   }
 
   private bindDetailFocus(input: HTMLInputElement | HTMLTextAreaElement) {
-    const focus = () => {
-      this.focusedDetailInput = input;
-    };
-    input.addEventListener('focus', focus);
-    input.addEventListener('click', focus);
     input.addEventListener('keydown', (event: KeyboardEvent) => {
       if (event.key !== 'Tab') {
         return;
@@ -1522,61 +1509,6 @@ export class PasswordManagerModal extends Modal {
     } finally {
       this.isSavingDetails = false;
     }
-  }
-
-  private async pasteIntoFocusedField() {
-    if (this.isTrashMode()) {
-      return;
-    }
-
-    const input = this.focusedDetailInput;
-    if (!input) {
-      new Notice(PWM_TEXT.FOCUS_FIELD_TO_PASTE);
-      return;
-    }
-
-    const text = await navigator.clipboard.readText();
-    const parsed = parsePasswordItemFromCopy(text);
-    const hasParsedContent = Object.values(parsed).some((value) => typeof value === 'string');
-
-    if (!hasParsedContent) {
-      const start = input.selectionStart ?? input.value.length;
-      const end = input.selectionEnd ?? input.value.length;
-      const nextValue = `${input.value.slice(0, start)}${text}${input.value.slice(end)}`;
-      input.value = nextValue;
-      const cursor = start + text.length;
-      input.setSelectionRange?.(cursor, cursor);
-      input.dispatchEvent(new Event('input'));
-      input.focus();
-      return;
-    }
-
-    const fieldValues = {
-      title: parsed.title,
-      username: parsed.username,
-      password: parsed.password,
-      notes: parsed.notes,
-    };
-
-    (Object.entries(fieldValues) as Array<[keyof typeof fieldValues, string | undefined]>).forEach(([key, value]) => {
-      if (value === undefined) {
-        return;
-      }
-      this.detailsDraft[key] = value;
-      const field = this.detailInputs[key];
-      if (!field) {
-        return;
-      }
-      field.value = value;
-      field.dispatchEvent(new Event('input'));
-    });
-
-    if (parsed.url !== undefined) {
-      this.detailsDraft.urls = parsed.url ? [parsed.url] : [''];
-      this.render();
-    }
-
-    input.focus();
   }
 
   private createSortMenuButton(
