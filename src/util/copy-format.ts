@@ -41,7 +41,16 @@ function formatUrlsForStructuredText(urls: string[]) {
     return wrapMarkdownLink(normalizedUrls[0] ?? '');
   }
 
-  return normalizedUrls.map((url) => `\n  - ${wrapMarkdownLink(url)}`).join('');
+  return normalizedUrls.map((url) => `\n    - ${wrapMarkdownLink(url)}`).join('');
+}
+
+function formatNotesForMarkdown(value: string) {
+  const normalized = value.trim();
+  if (!normalized) {
+    return '';
+  }
+
+  return `\n${normalized.split(/\r?\n/).map((line) => `    ${line}`).join('\n')}`;
 }
 
 function getGroupNames(item: PasswordItem, groups: PasswordGroup[]) {
@@ -86,7 +95,7 @@ export function formatPasswordItemForCopy(
         `- ${COPY_FIELD_LABELS.username}：${wrapInlineCode(username)}`,
         `- ${COPY_FIELD_LABELS.password}：${wrapInlineCode(password)}`,
         `- ${COPY_FIELD_LABELS.url}：${formatUrlsForStructuredText(urls)}`,
-        `- ${COPY_FIELD_LABELS.notes}：${notes}`,
+        `- ${COPY_FIELD_LABELS.notes}：${formatNotesForMarkdown(notes)}`,
       ].join('\n');
   }
 }

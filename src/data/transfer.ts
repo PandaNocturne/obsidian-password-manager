@@ -89,7 +89,16 @@ function formatMarkdownUrls(item: Pick<PasswordItem, 'urls'> & { url?: string })
   if (urls.length === 1) {
     return wrapMarkdownLink(urls[0] ?? '');
   }
-  return `\n${urls.map((url) => `  - ${wrapMarkdownLink(url)}`).join('\n')}`;
+  return `\n${urls.map((url) => `    - ${wrapMarkdownLink(url)}`).join('\n')}`;
+}
+
+function formatMarkdownIndentedValue(value: string) {
+  const normalized = escapeMarkdownValue(value);
+  if (!normalized) {
+    return '';
+  }
+
+  return `\n${normalized.split('\n').map((line) => `    ${line}`).join('\n')}`;
 }
 
 function unwrapMarkdownValue(value: string) {
@@ -174,7 +183,7 @@ function buildMarkdownItemLines(item: PasswordItem, headingLevel: 2 | 3) {
     `- ${getMarkdownFieldLabel('username')}：${wrapInlineCode(item.username)}`,
     `- ${getMarkdownFieldLabel('password')}：${wrapInlineCode(item.password)}`,
     `- ${getMarkdownFieldLabel('url')}：${formatMarkdownUrls(item)}`,
-    `- ${getMarkdownFieldLabel('notes')}：${escapeMarkdownValue(item.notes)}`,
+    `- ${getMarkdownFieldLabel('notes')}：${formatMarkdownIndentedValue(item.notes)}`,
   ].join('\n');
 }
 
@@ -205,6 +214,25 @@ function parseMarkdownUrlList(lines: string[], startIndex: number) {
   }
 
   return { urls, nextIndex };
+}
+
+function parseMarkdownIndentedValue(lines: string[], startIndex: number) {
+  const values: string[] = [];
+  let nextIndex = startIndex;
+
+  while (nextIndex < lines.length) {
+    const line = lines[nextIndex] ?? '';
+    if (!line.startsWith('    ')) {
+      break;
+    }
+    values.push(line.slice(4));
+    nextIndex += 1;
+  }
+
+  return {
+    value: values.join('\n').trim(),
+    nextIndex,
+  };
 }
 
 function parseGroupedMarkdownGroups(text: string): ParsedMarkdownGroup[] {
@@ -277,9 +305,16 @@ function parseGroupedMarkdownGroups(text: string): ParsedMarkdownGroup[] {
         index = nextIndex - 1;
         break;
       }
-      case 'notes':
-        itemRef.notes = value;
+      case 'notes': {
+        if (value) {
+          itemRef.notes = value;
+          break;
+        }
+        const { value: noteValue, nextIndex } = parseMarkdownIndentedValue(lines, index + 1);
+        itemRef.notes = noteValue;
+        index = nextIndex - 1;
         break;
+      }
       default:
         break;
     }
@@ -341,9 +376,16 @@ function parseFlatMarkdownItems(text: string) {
           index = nextIndex - 1;
           break;
         }
-        case 'notes':
-          item.notes = value;
+        case 'notes': {
+          if (value) {
+            item.notes = value;
+            break;
+          }
+          const { value: noteValue, nextIndex } = parseMarkdownIndentedValue(lines, index + 1);
+          item.notes = noteValue;
+          index = nextIndex - 1;
           break;
+        }
         default:
           break;
       }

@@ -92,9 +92,9 @@ export class PasswordTransferService {
 
     const exportedAt = Date.now();
     if (format === 'markdown') {
-      downloadMarkdownGroups(appendDateTimeSuffix('selected-groups.md', exportedAt), groupsWithItems);
+      downloadMarkdownGroups(appendDateTimeSuffix('export-groups.md', exportedAt), groupsWithItems);
     } else {
-      downloadJson(appendDateTimeSuffix('selected-groups.json', exportedAt), {
+      downloadJson(appendDateTimeSuffix('export-groups.json', exportedAt), {
         version: 1,
         kind: 'groups',
         exportedAt,
@@ -133,9 +133,9 @@ export class PasswordTransferService {
 
     const exportedAt = Date.now();
     if (format === 'markdown') {
-      downloadMarkdownItems(appendDateTimeSuffix('selected-items.md', exportedAt), items, this.context.data.groups);
+      downloadMarkdownItems(appendDateTimeSuffix('export-items.md', exportedAt), items, this.context.data.groups);
     } else {
-      downloadJson(appendDateTimeSuffix('selected-items.json', exportedAt), {
+      downloadJson(appendDateTimeSuffix('export-items.json', exportedAt), {
         version: 1,
         kind: 'items',
         exportedAt,
