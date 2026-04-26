@@ -29,6 +29,7 @@ export default class PasswordManagerPlugin extends Plugin {
     this.initializeDependencies();
     await this.context.loadPluginData();
     this.registerEntrypoints();
+    await this.transferService.syncLibraryMarkdownExport();
   }
 
   private initializeDependencies() {
@@ -102,7 +103,9 @@ export default class PasswordManagerPlugin extends Plugin {
   }
 
   async savePluginData() {
-    return this.context.savePluginData();
+    const result = await this.context.savePluginData();
+    await this.transferService.syncLibraryMarkdownExport();
+    return result;
   }
 
   async savePluginConfig() {
@@ -143,6 +146,22 @@ export default class PasswordManagerPlugin extends Plugin {
 
   async exportLibrary() {
     return this.transferService.exportLibrary();
+  }
+
+  async syncLibraryMarkdownExport() {
+    return this.transferService.syncLibraryMarkdownExport();
+  }
+
+  async ensureLibraryMarkdownExportFile() {
+    return this.transferService.ensureLibraryMarkdownExportFile();
+  }
+
+  async openLibraryMarkdownExportFile() {
+    return this.transferService.openLibraryMarkdownExportFile();
+  }
+
+  getLibraryMarkdownExportFile() {
+    return this.transferService.getLibraryMarkdownExportFile();
   }
 
   exportGroup(groupId: string, format: 'json' | 'markdown' = 'json') {

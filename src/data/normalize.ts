@@ -195,6 +195,14 @@ export function normalizePluginConfig(config: unknown): PasswordPluginConfig {
       typeof source?.lastAutoBackupAt === 'number' && Number.isFinite(source.lastAutoBackupAt)
         ? source.lastAutoBackupAt
         : 0,
+    autoExportMarkdownEnabled:
+      typeof source?.autoExportMarkdownEnabled === 'boolean'
+        ? source.autoExportMarkdownEnabled
+        : false,
+    autoExportMarkdownFilePath:
+      typeof source?.autoExportMarkdownFilePath === 'string'
+        ? source.autoExportMarkdownFilePath.trim()
+        : '',
     encryptionEnabled:
       typeof source?.encryptionEnabled === 'boolean'
         ? source.encryptionEnabled

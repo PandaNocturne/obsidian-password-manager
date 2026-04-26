@@ -1,4 +1,4 @@
-import { Notice, type App } from 'obsidian';
+import { Notice, normalizePath, TFile, type App } from 'obsidian';
 import {
   importGroupFromText,
   importItemFromText,
@@ -11,6 +11,7 @@ import {
   downloadMarkdownGroup,
   downloadMarkdownGroups,
   downloadMarkdownItems,
+  exportLibraryToMarkdown,
 } from '../data/transfer';
 import { PWM_TEXT } from '../lang';
 import { appendDateTimeSuffix } from '../util/file-name';
@@ -44,6 +45,57 @@ export class PasswordTransferService {
       data: this.context.data,
     });
     new Notice(PWM_TEXT.EXPORT_SUCCESS);
+  }
+
+  async syncLibraryMarkdownExport() {
+    const file = await this.ensureLibraryMarkdownExportFile();
+    if (!file) {
+      return null;
+    }
+
+    const content = exportLibraryToMarkdown(this.context.data.groups, this.context.data.items);
+    await this.app.vault.modify(file, content);
+    return file;
+  }
+
+  async ensureLibraryMarkdownExportFile() {
+    const path = this.getMarkdownExportPath();
+    if (!path) {
+      return null;
+    }
+
+    const existing = this.app.vault.getAbstractFileByPath(path);
+    if (existing instanceof TFile) {
+      return existing;
+    }
+
+    if (existing) {
+      return null;
+    }
+
+    await this.ensureParentFolders(path);
+    const initialContent = exportLibraryToMarkdown(this.context.data.groups, this.context.data.items);
+    return this.app.vault.create(path, initialContent);
+  }
+
+  async openLibraryMarkdownExportFile() {
+    const file = await this.ensureLibraryMarkdownExportFile();
+    if (!file) {
+      return false;
+    }
+
+    await this.app.workspace.getLeaf(true).openFile(file);
+    return true;
+  }
+
+  getLibraryMarkdownExportFile() {
+    const path = this.getMarkdownExportPath();
+    if (!path) {
+      return null;
+    }
+
+    const file = this.app.vault.getAbstractFileByPath(path);
+    return file instanceof TFile ? file : null;
   }
 
   exportGroup(groupId: string, format: 'json' | 'markdown' = 'json') {
@@ -189,6 +241,31 @@ export class PasswordTransferService {
       return importItemsFromText(text, this.context.data, groupId);
     } catch {
       throw new Error(PWM_TEXT.IMPORT_FAILED);
+    }
+  }
+
+  private getMarkdownExportPath() {
+    const { autoExportMarkdownEnabled, autoExportMarkdownFilePath } = this.context.pluginConfig;
+    if (!autoExportMarkdownEnabled || !autoExportMarkdownFilePath) {
+      return '';
+    }
+
+    return normalizePath(autoExportMarkdownFilePath);
+  }
+
+  private async ensureParentFolders(path: string) {
+    const segments = path.split('/');
+    if (segments.length <= 1) {
+      return;
+    }
+
+    let currentPath = '';
+    for (const segment of segments.slice(0, -1)) {
+      currentPath = currentPath ? `${currentPath}/${segment}` : segment;
+      if (this.app.vault.getAbstractFileByPath(currentPath)) {
+        continue;
+      }
+      await this.app.vault.createFolder(currentPath);
     }
   }
 }

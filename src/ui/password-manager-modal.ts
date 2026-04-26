@@ -472,6 +472,9 @@ export class PasswordManagerModal extends Modal {
         this.resetItemSelection(this.selectedItemId);
       }, 'application/json,text/markdown,.json,.md');
     });
+    this.plugin.createIconButton(this.searchActionsEl, 'file-text', PWM_TEXT.OPEN_MARKDOWN_FILE, async () => {
+      await this.plugin.openLibraryMarkdownExportFile();
+    });
     const searchField = this.searchActionsEl.createDiv({ cls: 'pwm-modal-header-search-wrap' });
     const searchIcon = searchField.createDiv({ cls: 'pwm-modal-header-search-icon' });
     setIcon(searchIcon, 'search');

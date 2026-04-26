@@ -3,6 +3,7 @@ import { PluginSettingTab, Setting, type App } from 'obsidian';
 import { PWM_TEXT } from './lang';
 import type PasswordManagerPlugin from './main';
 import type { PasswordCopyFormat, PasswordUnlockMode } from './util/types';
+import { MarkdownFileSuggestModal } from './ui/markdown-file-suggest-modal';
 
 export interface PasswordManagerSettings {
   confirmBeforeDelete: boolean;
@@ -20,6 +21,8 @@ export interface PasswordPluginConfig {
   autoBackupIntervalMinutes: number;
   trashRetentionDays: number;
   lastAutoBackupAt: number;
+  autoExportMarkdownEnabled: boolean;
+  autoExportMarkdownFilePath: string;
   encryptionEnabled: boolean;
   encryptionUnlockMode: PasswordUnlockMode;
   encryptionRecheckIntervalMinutes: number;
@@ -48,6 +51,8 @@ export const DEFAULT_PASSWORD_PLUGIN_CONFIG: PasswordPluginConfig = {
   autoBackupIntervalMinutes: 5,
   trashRetentionDays: 150,
   lastAutoBackupAt: 0,
+  autoExportMarkdownEnabled: false,
+  autoExportMarkdownFilePath: '',
   encryptionEnabled: false,
   encryptionUnlockMode: 'session',
   encryptionRecheckIntervalMinutes: 30,
@@ -130,6 +135,64 @@ export class PasswordManagerSettingTab extends PluginSettingTab {
             await this.plugin.savePluginData();
           }),
       );
+
+    new Setting(containerEl)
+      .setName(PWM_TEXT.EXPORT_SETTINGS_TITLE)
+      .setHeading();
+
+    new Setting(containerEl)
+      .setName(PWM_TEXT.AUTO_EXPORT_MARKDOWN_SETTING)
+      .setDesc(PWM_TEXT.AUTO_EXPORT_MARKDOWN_SETTING_DESC)
+      .addToggle((toggle) =>
+        toggle
+          .setValue(this.plugin.pluginConfig.autoExportMarkdownEnabled)
+          .onChange(async (value) => {
+            this.plugin.updatePluginConfig({ autoExportMarkdownEnabled: value });
+            await this.plugin.savePluginConfig();
+            await this.plugin.syncLibraryMarkdownExport();
+            this.display();
+          }),
+      );
+
+    new Setting(containerEl)
+      .setName(PWM_TEXT.AUTO_EXPORT_MARKDOWN_FILE_SETTING)
+      .setDesc(PWM_TEXT.AUTO_EXPORT_MARKDOWN_FILE_SETTING_DESC)
+      .addText((text) => {
+        text
+          .setPlaceholder('Folder/Passwords.md')
+          .setValue(this.plugin.pluginConfig.autoExportMarkdownFilePath)
+          .onChange(async (value) => {
+            this.plugin.updatePluginConfig({ autoExportMarkdownFilePath: value.trim() });
+            await this.plugin.savePluginConfig();
+          });
+        text.inputEl.readOnly = true;
+      })
+      .addExtraButton((button) => {
+        button.setIcon('file');
+        button.setTooltip(PWM_TEXT.SELECT_MARKDOWN_FILE);
+        removeFromTabOrder(button.extraSettingsEl);
+        button.onClick(async () => {
+          const file = await MarkdownFileSuggestModal.open(this.app);
+          if (!file) {
+            return;
+          }
+
+          this.plugin.updatePluginConfig({ autoExportMarkdownFilePath: file.path });
+          await this.plugin.savePluginConfig();
+          await this.plugin.syncLibraryMarkdownExport();
+          this.display();
+        });
+      })
+      .addExtraButton((button) => {
+        button.setIcon('x');
+        button.setTooltip(PWM_TEXT.CLEAR_MARKDOWN_FILE);
+        removeFromTabOrder(button.extraSettingsEl);
+        button.onClick(async () => {
+          this.plugin.updatePluginConfig({ autoExportMarkdownFilePath: '' });
+          await this.plugin.savePluginConfig();
+          this.display();
+        });
+      });
 
     new Setting(containerEl)
       .setName(PWM_TEXT.MODAL_SETTINGS_TITLE)

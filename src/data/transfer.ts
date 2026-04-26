@@ -435,6 +435,13 @@ export function downloadMarkdownGroup(filename: string, group: PasswordGroup, it
   downloadText(filename, formatGroupedMarkdown(group.name, items), 'text/markdown;charset=utf-8');
 }
 
+export function exportLibraryToMarkdown(groups: PasswordGroup[], items: PasswordItem[]) {
+  return groups
+    .map((group) => formatGroupedMarkdown(group.name, items.filter((item) => item.groupIds.includes(group.id))))
+    .filter(Boolean)
+    .join('\n\n');
+}
+
 export function downloadCsvGroups(filename: string, groupsWithItems: Array<{ group: PasswordGroup; items: PasswordItem[] }>) {
   const header = ['group', 'title', 'username', 'password', 'url', 'notes', 'pinned', 'createdAt'];
   const rows = groupsWithItems.flatMap(({ group, items }) => items.map((item) => [
