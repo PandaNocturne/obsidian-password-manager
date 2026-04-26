@@ -1216,7 +1216,7 @@ export class PasswordManagerModal extends Modal {
 
     if (itemGroups.length) {
       itemGroups.forEach((group) => {
-        const tagEl = tags.createEl('a', { cls: 'tag pwm-group-tag', href: '#' });
+        const tagEl = tags.createEl('a', { cls: 'tag pwm-group-tag'});
         tagEl.setText(group.name);
         tagEl.addEventListener('click', (event) => event.preventDefault());
 
