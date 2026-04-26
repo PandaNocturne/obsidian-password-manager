@@ -465,7 +465,7 @@ export class PasswordManagerModal extends Modal {
       await this.plugin.exportLibrary();
     });
     this.plugin.createIconButton(this.searchActionsEl, 'download', PWM_TEXT.IMPORT_LIBRARY, async () => {
-      this.handleImport(async (text) => {
+      await this.handleImport(async (text) => {
         await this.plugin.importLibraryFromText(text);
         this.reconcileSelectionState();
         this.selectedGroupId = this.getResolvedSelectedGroupId();
@@ -493,7 +493,7 @@ export class PasswordManagerModal extends Modal {
       this.reconcileSelectionState();
       this.render();
     });
-    this.searchClearButtonEl = this.plugin.createIconButton(searchField, 'x', PWM_TEXT.CLEAR_SEARCH, async () => {
+    this.searchClearButtonEl = this.plugin.createIconButton(searchField, 'x', PWM_TEXT.CLEAR_SEARCH, () => {
       if (!this.searchInputEl) {
         return;
       }
@@ -748,7 +748,7 @@ export class PasswordManagerModal extends Modal {
 
     const footer = container.createDiv({ cls: 'pwm-footer-actions' });
     this.plugin.createIconButton(footer, 'folder-down', PWM_TEXT.IMPORT_GROUP, async () => {
-      this.handleImport(async (text) => {
+      await this.handleImport(async (text) => {
         const group = this.plugin.importGroupFromText(text);
         this.selectedGroupId = group.id;
         this.selectedItemId = this.getPreferredSelectedItemId(group.id);
@@ -957,7 +957,7 @@ export class PasswordManagerModal extends Modal {
 
     const footer = container.createDiv({ cls: 'pwm-footer-actions' });
     this.plugin.createIconButton(footer, 'file-down', PWM_TEXT.IMPORT_ITEMS, async () => {
-      this.handleImport(async (text) => {
+      await this.handleImport(async (text) => {
         const targetGroupId = this.isTrashMode()
           ? (this.plugin.data.groups[0]?.id ?? '')
           : this.selectedGroupId;
@@ -1148,7 +1148,7 @@ export class PasswordManagerModal extends Modal {
     });
 
     const actions = row.createDiv({ cls: 'pwm-inline-actions pwm-floating-actions' });
-    this.plugin.createIconButton(actions, 'external-link', PWM_TEXT.OPEN_URL, async () => {
+    this.plugin.createIconButton(actions, 'external-link', PWM_TEXT.OPEN_URL, () => {
       if (!input.value.trim()) {
         new Notice(PWM_TEXT.NO_OPEN_URL);
         return;
@@ -1161,7 +1161,7 @@ export class PasswordManagerModal extends Modal {
     });
 
     if (!this.isTrashMode()) {
-      this.plugin.createIconButton(actions, 'trash', PWM_TEXT.REMOVE_LINK, async () => {
+      this.plugin.createIconButton(actions, 'trash', PWM_TEXT.REMOVE_LINK, () => {
         const nextUrls = this.detailsDraft.urls.filter((_, currentIndex) => currentIndex !== index);
         this.detailsDraft.urls = nextUrls.length ? nextUrls : [''];
         this.render();
@@ -1216,7 +1216,7 @@ export class PasswordManagerModal extends Modal {
 
     if (itemGroups.length) {
       itemGroups.forEach((group) => {
-        const tagEl = tags.createEl('a', { cls: 'tag pwm-group-tag'});
+        const tagEl = tags.createEl('a', { cls: 'tag pwm-group-tag' });
         tagEl.setText(group.name);
         tagEl.addEventListener('click', (event) => event.preventDefault());
 
@@ -1270,7 +1270,7 @@ export class PasswordManagerModal extends Modal {
       footer,
       this.isTrashMode() ? 'arrow-left' : 'trash-2',
       this.isTrashMode() ? PWM_TEXT.SWITCH_MANAGER : PWM_TEXT.OPEN_TRASH,
-      async () => {
+      () => {
         this.toggleMode();
       },
     );
@@ -2009,29 +2009,34 @@ export class PasswordManagerModal extends Modal {
     });
   }
 
-  private handleImport(importer: (text: string) => Promise<void>, accept = 'application/json,.json') {
+  private handleImport(importer: (text: string) => Promise<void>, accept = 'application/json,.json'): Promise<void> {
     const input = document.createElement('input');
     input.type = 'file';
     input.accept = accept;
-    input.addEventListener('change', () => {
-      void (async () => {
-        const file = input.files?.[0];
-        if (!file) {
-          return;
-        }
+    return new Promise<void>((resolve, reject) => {
+      input.addEventListener('change', () => {
+        void (async () => {
+          const file = input.files?.[0];
+          if (!file) {
+            resolve();
+            return;
+          }
 
-        try {
-          const text = await file.text();
-          await importer(text);
-          await this.plugin.savePluginData();
-          new Notice(PWM_TEXT.IMPORT_SUCCESS);
-          this.render();
-        } catch {
-          new Notice(PWM_TEXT.IMPORT_FAILED);
-        }
-      })();
+          try {
+            const text = await file.text();
+            await importer(text);
+            await this.plugin.savePluginData();
+            new Notice(PWM_TEXT.IMPORT_SUCCESS);
+            this.render();
+            resolve();
+          } catch (error) {
+            new Notice(PWM_TEXT.IMPORT_FAILED);
+            reject(error);
+          }
+        })();
+      }, { once: true });
+      input.click();
     });
-    input.click();
   }
 
   private getVisibleGroups(): PasswordGroup[] {

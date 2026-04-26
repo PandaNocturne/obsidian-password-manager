@@ -24,7 +24,7 @@ export class PasswordTransferService {
   constructor(
     private readonly app: App,
     private readonly context: PasswordPluginContext,
-  ) {}
+  ) { }
 
   async exportLibrary() {
     const exportedAt = Date.now();
@@ -48,7 +48,7 @@ export class PasswordTransferService {
     new Notice(PWM_TEXT.EXPORT_SUCCESS);
   }
 
-  async exportGroup(groupId: string, format: 'json' | 'markdown' | 'csv' = 'json') {
+  exportGroup(groupId: string, format: 'json' | 'markdown' | 'csv' = 'json') {
     const group = this.context.getGroup(groupId);
     if (!group) {
       return false;
@@ -75,7 +75,7 @@ export class PasswordTransferService {
     return true;
   }
 
-  async exportGroups(groupIds: string[], format: 'json' | 'markdown' | 'csv' = 'json') {
+  exportGroups(groupIds: string[], format: 'json' | 'markdown' | 'csv' = 'json') {
     const groupsWithItems = groupIds
       .map((groupId) => {
         const group = this.context.getGroup(groupId);
@@ -113,7 +113,7 @@ export class PasswordTransferService {
     new Notice(PWM_TEXT.EXPORT_SUCCESS);
   }
 
-  async exportItem(itemId: string) {
+  exportItem(itemId: string) {
     const item = this.context.getItem(itemId);
     if (!item) {
       return;
@@ -129,7 +129,7 @@ export class PasswordTransferService {
     new Notice(PWM_TEXT.EXPORT_SUCCESS);
   }
 
-  async exportItems(itemIds: string[], format: 'json' | 'markdown') {
+  exportItems(itemIds: string[], format: 'json' | 'markdown') {
     const items = itemIds
       .map((itemId) => this.context.getItem(itemId))
       .filter((item): item is PasswordItem => !!item);
