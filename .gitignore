@@ -1,9 +1,14 @@
 # vscode
 .vscode 
+.history 
+.github  
+.specstory
+.*
 
 # Intellij
 *.iml
 .idea
+.tmp
 
 # npm
 node_modules
