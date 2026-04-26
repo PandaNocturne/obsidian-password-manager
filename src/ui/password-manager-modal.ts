@@ -465,7 +465,7 @@ export class PasswordManagerModal extends Modal {
       await this.plugin.exportLibrary();
     });
     this.plugin.createIconButton(this.searchActionsEl, 'download', PWM_TEXT.IMPORT_LIBRARY, async () => {
-      await this.handleImport(async (text) => {
+      this.handleImport(async (text) => {
         await this.plugin.importLibraryFromText(text);
         this.reconcileSelectionState();
         this.selectedGroupId = this.getResolvedSelectedGroupId();
@@ -748,8 +748,8 @@ export class PasswordManagerModal extends Modal {
 
     const footer = container.createDiv({ cls: 'pwm-footer-actions' });
     this.plugin.createIconButton(footer, 'folder-down', PWM_TEXT.IMPORT_GROUP, async () => {
-      await this.handleImport(async (text) => {
-        const group = await this.plugin.importGroupFromText(text);
+      this.handleImport(async (text) => {
+        const group = this.plugin.importGroupFromText(text);
         this.selectedGroupId = group.id;
         this.selectedItemId = this.getPreferredSelectedItemId(group.id);
         this.resetGroupSelection(group.id);
@@ -957,14 +957,14 @@ export class PasswordManagerModal extends Modal {
 
     const footer = container.createDiv({ cls: 'pwm-footer-actions' });
     this.plugin.createIconButton(footer, 'file-down', PWM_TEXT.IMPORT_ITEMS, async () => {
-      await this.handleImport(async (text) => {
+      this.handleImport(async (text) => {
         const targetGroupId = this.isTrashMode()
           ? (this.plugin.data.groups[0]?.id ?? '')
           : this.selectedGroupId;
         if (!targetGroupId) {
           return;
         }
-        const importedItems = await this.plugin.importItemsFromText(text, targetGroupId);
+        const importedItems = this.plugin.importItemsFromText(text, targetGroupId);
         const firstImportedItem = importedItems[0];
         if (!firstImportedItem) {
           return;
@@ -1867,7 +1867,7 @@ export class PasswordManagerModal extends Modal {
       if (this.isTrashMode()) {
         changed = this.plugin.deleteTrashItem(itemId) || changed;
       } else {
-        const deleted = await this.plugin.deleteItem(itemId);
+        const deleted = this.plugin.deleteItem(itemId);
         changed = changed || !!deleted;
       }
     }

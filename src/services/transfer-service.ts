@@ -39,7 +39,7 @@ export class PasswordTransferService {
       return;
     }
 
-    await downloadJson(filename, {
+    downloadJson(filename, {
       version: 1,
       kind: 'library',
       exportedAt,
@@ -57,11 +57,11 @@ export class PasswordTransferService {
     const exportedAt = Date.now();
     const items = this.context.getItemsByGroup(groupId);
     if (format === 'markdown') {
-      await downloadMarkdownGroup(appendDateTimeSuffix(`${group.name || 'group'}.md`, exportedAt), group, items);
+      downloadMarkdownGroup(appendDateTimeSuffix(`${group.name || 'group'}.md`, exportedAt), group, items);
     } else if (format === 'csv') {
-      await downloadCsvGroup(appendDateTimeSuffix(`${group.name || 'group'}.csv`, exportedAt), group, items);
+      downloadCsvGroup(appendDateTimeSuffix(`${group.name || 'group'}.csv`, exportedAt), group, items);
     } else {
-      await downloadJson(appendDateTimeSuffix(`${group.name || 'group'}.json`, exportedAt), {
+      downloadJson(appendDateTimeSuffix(`${group.name || 'group'}.json`, exportedAt), {
         version: 1,
         kind: 'group',
         exportedAt,
@@ -96,11 +96,11 @@ export class PasswordTransferService {
 
     const exportedAt = Date.now();
     if (format === 'markdown') {
-      await downloadMarkdownGroups(appendDateTimeSuffix('selected-groups.md', exportedAt), groupsWithItems);
+      downloadMarkdownGroups(appendDateTimeSuffix('selected-groups.md', exportedAt), groupsWithItems);
     } else if (format === 'csv') {
-      await downloadCsvGroups(appendDateTimeSuffix('selected-groups.csv', exportedAt), groupsWithItems);
+      downloadCsvGroups(appendDateTimeSuffix('selected-groups.csv', exportedAt), groupsWithItems);
     } else {
-      await downloadJson(appendDateTimeSuffix('selected-groups.json', exportedAt), {
+      downloadJson(appendDateTimeSuffix('selected-groups.json', exportedAt), {
         version: 1,
         kind: 'groups',
         exportedAt,
@@ -120,7 +120,7 @@ export class PasswordTransferService {
     }
 
     const exportedAt = Date.now();
-    await downloadJson(appendDateTimeSuffix(`${item.title || 'item'}.json`, exportedAt), {
+    downloadJson(appendDateTimeSuffix(`${item.title || 'item'}.json`, exportedAt), {
       version: 1,
       kind: 'item',
       exportedAt,
@@ -139,9 +139,9 @@ export class PasswordTransferService {
 
     const exportedAt = Date.now();
     if (format === 'markdown') {
-      await downloadMarkdownItems(appendDateTimeSuffix('selected-items.md', exportedAt), items, this.context.data.groups);
+      downloadMarkdownItems(appendDateTimeSuffix('selected-items.md', exportedAt), items, this.context.data.groups);
     } else {
-      await downloadJson(appendDateTimeSuffix('selected-items.json', exportedAt), {
+      downloadJson(appendDateTimeSuffix('selected-items.json', exportedAt), {
         version: 1,
         kind: 'items',
         exportedAt,

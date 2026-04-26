@@ -4,6 +4,12 @@ import { createPasswordVerifier, verifyPassword } from '../util/encryption';
 import type { PasswordPluginContext } from './plugin-context';
 import { PasswordPromptModal, type PasswordPromptField } from '../ui/password-prompt-modal';
 
+type ElectronShellModule = {
+  shell?: {
+    openPath: (targetPath: string) => Promise<string>;
+  };
+};
+
 export class PasswordEncryptionService {
   constructor(
     private readonly app: App,
@@ -353,15 +359,17 @@ export class PasswordEncryptionService {
       await adapter.mkdir(path).catch(() => undefined);
 
       const absolutePath = `${adapter.getBasePath()}/${path}`.replace(/[/\\]+/g, '/');
+      const electronWindow = window as Window & {
+        require?: (module: string) => unknown;
+      };
+      const electronGlobal = globalThis as typeof globalThis & {
+        require?: (module: string) => unknown;
+      };
       const electronModule =
-        (window as Window & {
-          require?: (module: string) => { shell?: { openPath: (targetPath: string) => Promise<string> } };
-        }).require?.('electron') ??
-        (globalThis as typeof globalThis & {
-          require?: (module: string) => { shell?: { openPath: (targetPath: string) => Promise<string> } };
-        }).require?.('electron');
+        (electronWindow.require?.('electron') as ElectronShellModule | undefined) ??
+        (electronGlobal.require?.('electron') as ElectronShellModule | undefined);
       const shell = electronModule?.shell;
-      const opened = await shell?.openPath(absolutePath);
+      const opened = shell ? await shell.openPath(absolutePath) : undefined;
       if (opened === '') {
         if (successMessage) {
           new Notice(successMessage);
