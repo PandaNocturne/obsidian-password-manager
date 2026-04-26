@@ -1,6 +1,6 @@
 {
 	"name": "password-manager",
-	"version": "1.0.7",
+	"version": "1.0.8",
 	"description": "A lightweight local password manager for Obsidian with encryption, backup, trash, and import/export support.",
 	"main": "main.js",
 	"type": "module",
