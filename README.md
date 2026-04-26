@@ -1,6 +1,6 @@
 # Obsidian Password Manager
 
-[中文文档](./README.zh.md)
+[中文文档](./README.zh-CN.md)
 
 > Lightweight account, password, and link management inside Obsidian — with encryption, backup, recycle bin, and import/export support.
 
