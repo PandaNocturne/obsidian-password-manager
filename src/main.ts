@@ -52,7 +52,7 @@ export default class PasswordManagerPlugin extends Plugin {
     });
 
     this.addCommand({
-      id: 'open-password-manager',
+      id: 'open-manager',
       name: PWM_TEXT.openManager,
       callback: () => {
         void this.openManager();

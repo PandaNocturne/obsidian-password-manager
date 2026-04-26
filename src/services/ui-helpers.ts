@@ -11,9 +11,12 @@ export const createIconButton = (
     attr: { 'aria-label': label, type: 'button' },
   });
   setIcon(button, icon);
-  button.addEventListener('click', async (event) => {
+  button.addEventListener('click', (event) => {
     event.stopPropagation();
-    await onClick();
+    const result = onClick();
+    if (result instanceof Promise) {
+      void result;
+    }
   });
   return button;
 };

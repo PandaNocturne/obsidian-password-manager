@@ -5,6 +5,12 @@ import { includesKeyword, normalizeSearchKeyword } from '../util/search';
 import { parsePasswordItemFromCopy } from '../util/copy-format';
 import type { DeletedPasswordItem, PasswordGroup, PasswordItem, PwmFieldAction, PwmSortMode, PwmTextFieldOptions } from '../util/types';
 
+function setCssProps(element: HTMLElement, styles: Record<string, string>) {
+  Object.entries(styles).forEach(([property, value]) => {
+    element.style.setProperty(property, value);
+  });
+}
+
 const GROUP_SORT_OPTIONS: Array<{ value: PwmSortMode; label: string }> = [
   { value: 'custom', label: PWM_TEXT.sortCustom },
   { value: 'name-asc', label: PWM_TEXT.sortByNameAsc },
@@ -190,7 +196,9 @@ export class PasswordManagerModal extends Modal {
   private applyLayoutWidths(root: HTMLDivElement) {
     const [groupRatio, itemRatio, detailRatio] = this.parseColumnRatios();
     this.syncLayoutLockState(root);
-    root.style.gridTemplateColumns = `minmax(160px, ${groupRatio}fr) 6px minmax(160px, ${itemRatio}fr) 6px minmax(340px, ${detailRatio}fr)`;
+    setCssProps(root, {
+      'grid-template-columns': `minmax(160px, ${groupRatio}fr) 6px minmax(160px, ${itemRatio}fr) 6px minmax(340px, ${detailRatio}fr)`,
+    });
   }
 
   refreshLayout() {
@@ -326,11 +334,10 @@ export class PasswordManagerModal extends Modal {
         return;
       }
 
-      void this.persistColumnRatios(widths.groupWidth, widths.itemWidth, widths.detailWidth).then(() => {
-        if (this.rootEl) {
-          this.applyLayoutWidths(this.rootEl);
-        }
-      });
+      void this.persistColumnRatios(widths.groupWidth, widths.itemWidth, widths.detailWidth);
+      if (this.rootEl) {
+        this.applyLayoutWidths(this.rootEl);
+      }
     };
 
     const onPointerMove = (moveEvent: PointerEvent) => {

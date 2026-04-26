@@ -36,7 +36,7 @@ export class PasswordStorageStore {
     return normalizePath(`${this.getStorageFolder(config)}/${BACKUP_DIR_NAME}`);
   }
 
-  async readStoredData(config: PasswordPluginConfig): Promise<unknown | null> {
+  async readStoredData(config: PasswordPluginConfig): Promise<unknown> {
     const adapter = this.app.vault.adapter;
     const dataFilePath = this.getDataFilePath(config);
     if (!(await adapter.exists(dataFilePath))) {

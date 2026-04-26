@@ -79,7 +79,9 @@ export class PasswordManagerSettingTab extends PluginSettingTab {
     const { containerEl } = this;
     containerEl.empty();
 
-    containerEl.createEl('h2', { text: PWM_TEXT.settingsTitle });
+    new Setting(containerEl)
+      .setName(PWM_TEXT.settingsTitle)
+      .setHeading();
 
     new Setting(containerEl)
       .setName(PWM_TEXT.storageFolderSetting)
@@ -129,7 +131,9 @@ export class PasswordManagerSettingTab extends PluginSettingTab {
           }),
       );
 
-    containerEl.createEl('h3', { text: PWM_TEXT.modalSettingsTitle });
+    new Setting(containerEl)
+      .setName(PWM_TEXT.modalSettingsTitle)
+      .setHeading();
 
     new Setting(containerEl)
       .setName(PWM_TEXT.modalWidthSetting)
@@ -196,11 +200,10 @@ export class PasswordManagerSettingTab extends PluginSettingTab {
         });
       });
 
-    containerEl.createEl('h3', { text: PWM_TEXT.encryptionSettingsTitle });
-    containerEl.createEl('p', {
-      text: PWM_TEXT.encryptionSettingsTitleDesc,
-      cls: 'setting-item-description',
-    });
+    new Setting(containerEl)
+      .setName(PWM_TEXT.encryptionSettingsTitle)
+      .setDesc(PWM_TEXT.encryptionSettingsTitleDesc)
+      .setHeading();
 
     new Setting(containerEl)
       .setName(PWM_TEXT.encryptionEnabledSetting)
@@ -300,7 +303,9 @@ export class PasswordManagerSettingTab extends PluginSettingTab {
         });
     }
 
-    containerEl.createEl('h3', { text: PWM_TEXT.backupSettingsTitle });
+    new Setting(containerEl)
+      .setName(PWM_TEXT.backupSettingsTitle)
+      .setHeading();
 
     new Setting(containerEl)
       .setName(PWM_TEXT.createBackupNow)

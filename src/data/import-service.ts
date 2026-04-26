@@ -46,7 +46,7 @@ function parseLibraryImportData(payload: unknown): PasswordManagerData {
     && rawPayload.kind === 'library'
     && 'data' in rawPayload
   ) {
-    const data = (rawPayload as PasswordManagerExportPayload).data as PasswordManagerData;
+    const data = rawPayload.data as PasswordManagerData;
     if (!data || typeof data !== 'object') {
       throw new Error('Invalid import payload');
     }
@@ -54,7 +54,7 @@ function parseLibraryImportData(payload: unknown): PasswordManagerData {
   }
 
   if (rawPayload && typeof rawPayload === 'object' && 'groups' in rawPayload && 'items' in rawPayload) {
-    return rawPayload as PasswordManagerData;
+    return rawPayload;
   }
 
   throw new Error('Invalid import payload');
