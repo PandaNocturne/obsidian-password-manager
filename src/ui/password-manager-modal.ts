@@ -152,10 +152,12 @@ export class PasswordManagerModal extends Modal {
 
   private applyModalSize() {
     const { modalWidthExpr, modalHeightExpr } = this.plugin.pluginConfig;
-    this.modalEl.style.width = this.toModalCssMinValue(modalWidthExpr);
-    this.modalEl.style.maxWidth = 'none';
-    this.modalEl.style.height = this.toModalCssMinValue(modalHeightExpr);
-    this.modalEl.style.maxHeight = 'none';
+    setCssProps(this.modalEl, {
+      width: this.toModalCssMinValue(modalWidthExpr),
+      'max-width': 'none',
+      height: this.toModalCssMinValue(modalHeightExpr),
+      'max-height': 'none',
+    });
   }
 
   private toModalCssMinValue(value: string) {
@@ -623,56 +625,58 @@ export class PasswordManagerModal extends Modal {
           row.addClass('is-drop-target');
         });
         row.addEventListener('dragleave', () => row.removeClass('is-drop-target'));
-        row.addEventListener('drop', async (event) => {
-          event.preventDefault();
-          row.removeClass('is-drop-target');
+        row.addEventListener('drop', (event) => {
+          void (async () => {
+            event.preventDefault();
+            row.removeClass('is-drop-target');
 
-          if (this.draggingGroupId) {
-            if (this.plugin.data.view.groupSort !== 'custom' || this.keyword) {
+            if (this.draggingGroupId) {
+              if (this.plugin.data.view.groupSort !== 'custom' || this.keyword) {
+                return;
+              }
+              const draggedGroupIds = this.getDraggedGroupIds();
+              if (!draggedGroupIds.length || draggedGroupIds.includes(group.id)) {
+                return;
+              }
+              const allowed = await this.ensureWriteAccess();
+              if (!allowed) {
+                return;
+              }
+              this.plugin.moveGroups(draggedGroupIds, index);
+              await this.plugin.savePluginData();
+              this.render();
               return;
             }
-            const draggedGroupIds = this.getDraggedGroupIds();
-            if (!draggedGroupIds.length || draggedGroupIds.includes(group.id)) {
+
+            if (!this.draggingItemId) {
               return;
             }
+
+            this.updateItemDragMode(event.ctrlKey ? 'add' : 'move', event.dataTransfer ?? undefined);
+            const mode = this.dragGroupMode;
+            const draggedItemIds = this.getDraggedItemIds();
             const allowed = await this.ensureWriteAccess();
             if (!allowed) {
               return;
             }
-            this.plugin.moveGroups(draggedGroupIds, index);
+            let changed = false;
+            for (const itemId of draggedItemIds) {
+              changed = this.plugin.assignItemToGroup(itemId, group.id, mode) || changed;
+            }
+            if (!changed) {
+              return;
+            }
+            this.selectedGroupId = group.id;
+            this.resetGroupSelection(group.id);
+            this.selectedItemIds = new Set(draggedItemIds.filter((itemId) => this.plugin.getItem(itemId)?.groupIds.includes(group.id)));
+            this.selectedItemId = this.getPreferredSelectedItemId(group.id, this.draggingItemId);
+            if (this.selectedItemId) {
+              this.selectedItemIds.add(this.selectedItemId);
+            }
+            this.itemSelectionAnchorId = this.selectedItemId;
             await this.plugin.savePluginData();
             this.render();
-            return;
-          }
-
-          if (!this.draggingItemId) {
-            return;
-          }
-
-          this.updateItemDragMode(event.ctrlKey ? 'add' : 'move', event.dataTransfer ?? undefined);
-          const mode = this.dragGroupMode;
-          const draggedItemIds = this.getDraggedItemIds();
-          const allowed = await this.ensureWriteAccess();
-          if (!allowed) {
-            return;
-          }
-          let changed = false;
-          for (const itemId of draggedItemIds) {
-            changed = this.plugin.assignItemToGroup(itemId, group.id, mode) || changed;
-          }
-          if (!changed) {
-            return;
-          }
-          this.selectedGroupId = group.id;
-          this.resetGroupSelection(group.id);
-          this.selectedItemIds = new Set(draggedItemIds.filter((itemId) => this.plugin.getItem(itemId)?.groupIds.includes(group.id)));
-          this.selectedItemId = this.getPreferredSelectedItemId(group.id, this.draggingItemId);
-          if (this.selectedItemId) {
-            this.selectedItemIds.add(this.selectedItemId);
-          }
-          this.itemSelectionAnchorId = this.selectedItemId;
-          await this.plugin.savePluginData();
-          this.render();
+          })();
         });
       }
 
@@ -701,10 +705,10 @@ export class PasswordManagerModal extends Modal {
           this.render();
         };
         input.addEventListener('click', (event) => event.stopPropagation());
-        input.addEventListener('keydown', async (event) => {
+        input.addEventListener('keydown', (event) => {
           if (event.key === 'Enter') {
             event.preventDefault();
-            await finishEdit();
+            void finishEdit();
           }
           if (event.key === 'Escape') {
             event.preventDefault();
@@ -712,8 +716,8 @@ export class PasswordManagerModal extends Modal {
             this.render();
           }
         });
-        input.addEventListener('blur', async () => {
-          await finishEdit();
+        input.addEventListener('blur', () => {
+          void finishEdit();
         });
         window.setTimeout(() => {
           input.focus();
@@ -735,7 +739,7 @@ export class PasswordManagerModal extends Modal {
       badge.setText(String(this.getModeItemsByGroup(group.id).length));
 
       row.addEventListener('click', (event) => {
-        this.handleGroupSelection(group.id, event, groups);
+        void this.handleGroupSelection(group.id, event, groups);
       });
     });
 
@@ -854,7 +858,7 @@ export class PasswordManagerModal extends Modal {
         if (!this.isTrashMode()) {
           row.addEventListener('dragstart', (event) => {
             if (!this.selectedItemIds.has(item.id)) {
-              this.selectedGroupId = this.getPrimarySelectedGroupId(item as PasswordItem) || this.selectedGroupId;
+              this.selectedGroupId = this.getPrimarySelectedGroupId(item) || this.selectedGroupId;
               this.resetItemSelection(item.id);
             }
             this.draggingItemId = item.id;
@@ -873,33 +877,35 @@ export class PasswordManagerModal extends Modal {
             row.addClass('is-drop-target');
           });
           row.addEventListener('dragleave', () => row.removeClass('is-drop-target'));
-          row.addEventListener('drop', async (event) => {
-            if (this.plugin.data.view.itemSort !== 'custom' || this.keyword) {
-              return;
-            }
-            this.updateItemDragMode(event.ctrlKey ? 'add' : 'move', event.dataTransfer ?? undefined);
-            event.preventDefault();
-            row.removeClass('is-drop-target');
-            if (!this.draggingItemId) {
-              return;
-            }
-            const draggedItemIds = this.getDraggedItemIds();
-            if (!draggedItemIds.length || draggedItemIds.includes(item.id)) {
-              return;
-            }
-            const allowed = await this.ensureWriteAccess();
-            if (!allowed) {
-              return;
-            }
-            this.plugin.moveItemsWithinGroup(draggedItemIds, index, this.selectedGroupId);
-            this.selectedItemIds = new Set(draggedItemIds);
-            this.selectedItemId = this.getPreferredSelectedItemId(this.selectedGroupId, this.draggingItemId);
-            if (this.selectedItemId) {
-              this.selectedItemIds.add(this.selectedItemId);
-            }
-            this.itemSelectionAnchorId = this.selectedItemId;
-            await this.plugin.savePluginData();
-            this.render();
+          row.addEventListener('drop', (event) => {
+            void (async () => {
+              if (this.plugin.data.view.itemSort !== 'custom' || this.keyword) {
+                return;
+              }
+              this.updateItemDragMode(event.ctrlKey ? 'add' : 'move', event.dataTransfer ?? undefined);
+              event.preventDefault();
+              row.removeClass('is-drop-target');
+              if (!this.draggingItemId) {
+                return;
+              }
+              const draggedItemIds = this.getDraggedItemIds();
+              if (!draggedItemIds.length || draggedItemIds.includes(item.id)) {
+                return;
+              }
+              const allowed = await this.ensureWriteAccess();
+              if (!allowed) {
+                return;
+              }
+              this.plugin.moveItemsWithinGroup(draggedItemIds, index, this.selectedGroupId);
+              this.selectedItemIds = new Set(draggedItemIds);
+              this.selectedItemId = this.getPreferredSelectedItemId(this.selectedGroupId, this.draggingItemId);
+              if (this.selectedItemId) {
+                this.selectedItemIds.add(this.selectedItemId);
+              }
+              this.itemSelectionAnchorId = this.selectedItemId;
+              await this.plugin.savePluginData();
+              this.render();
+            })();
           });
         }
 
@@ -919,7 +925,7 @@ export class PasswordManagerModal extends Modal {
         const body = row.createDiv({ cls: 'pwm-item-body' });
         const meta = body.createDiv({ cls: 'pwm-item-meta' });
         meta.createDiv({ text: item.title || PWM_TEXT.untitledItem, cls: 'pwm-item-title' });
-        this.renderItemMeta(meta, item as PasswordItem);
+        this.renderItemMeta(meta, item);
 
         if (!this.isTrashMode()) {
           const rowActions = row.createDiv({ cls: 'pwm-item-row-actions pwm-item-row-actions-bottom' });
@@ -941,7 +947,7 @@ export class PasswordManagerModal extends Modal {
         }
 
         row.addEventListener('click', (event) => {
-          this.handleItemSelection(item.id, event, items);
+          void this.handleItemSelection(item.id, event, items);
         });
       });
     }
@@ -1099,7 +1105,7 @@ export class PasswordManagerModal extends Modal {
       this.detailsDraft.notes = notesTextarea.value;
     });
 
-    this.renderTagsFooter(detail, item as PasswordItem);
+    this.renderTagsFooter(detail, item);
     this.renderDetailsBottomToolbar(body);
   }
 
@@ -1177,7 +1183,7 @@ export class PasswordManagerModal extends Modal {
 
     if (!this.isTrashMode()) {
       const addTagButton = this.plugin.createIconButton(header, 'plus', PWM_TEXT.addTag, () => undefined);
-      addTagButton.addEventListener('click', async (event) => {
+      addTagButton.addEventListener('click', (event) => {
         event.preventDefault();
         event.stopPropagation();
 
@@ -1190,13 +1196,15 @@ export class PasswordManagerModal extends Modal {
         availableGroups.forEach((group) => {
           menu.addItem((menuItem) => {
             menuItem.setTitle(group.name);
-            menuItem.onClick(async () => {
-              const changed = this.plugin.assignItemToGroup(item.id, group.id, 'add');
-              if (!changed) {
-                return;
-              }
-              await this.plugin.savePluginData();
-              this.render();
+            menuItem.onClick(() => {
+              void (async () => {
+                const changed = this.plugin.assignItemToGroup(item.id, group.id, 'add');
+                if (!changed) {
+                  return;
+                }
+                await this.plugin.savePluginData();
+                this.render();
+              })();
             });
           });
         });
@@ -1222,15 +1230,17 @@ export class PasswordManagerModal extends Modal {
           attr: { type: 'button', 'aria-label': `${PWM_TEXT.removeTag}: ${group.name}` },
           text: '×',
         });
-        removeButton.addEventListener('click', async (event) => {
+        removeButton.addEventListener('click', (event) => {
           event.stopPropagation();
-          const removed = this.plugin.removeItemFromGroup(item.id, group.id);
-          if (!removed) {
-            return;
-          }
-          this.reconcileSelectionState();
-          await this.plugin.savePluginData();
-          this.render();
+          void (async () => {
+            const removed = this.plugin.removeItemFromGroup(item.id, group.id);
+            if (!removed) {
+              return;
+            }
+            this.reconcileSelectionState();
+            await this.plugin.savePluginData();
+            this.render();
+          })();
         });
       });
     } else {
@@ -2004,21 +2014,23 @@ export class PasswordManagerModal extends Modal {
     const input = document.createElement('input');
     input.type = 'file';
     input.accept = accept;
-    input.addEventListener('change', async () => {
-      const file = input.files?.[0];
-      if (!file) {
-        return;
-      }
+    input.addEventListener('change', () => {
+      void (async () => {
+        const file = input.files?.[0];
+        if (!file) {
+          return;
+        }
 
-      try {
-        const text = await file.text();
-        await importer(text);
-        await this.plugin.savePluginData();
-        new Notice(PWM_TEXT.importSuccess);
-        this.render();
-      } catch {
-        new Notice(PWM_TEXT.importFailed);
-      }
+        try {
+          const text = await file.text();
+          await importer(text);
+          await this.plugin.savePluginData();
+          new Notice(PWM_TEXT.importSuccess);
+          this.render();
+        } catch {
+          new Notice(PWM_TEXT.importFailed);
+        }
+      })();
     });
     input.click();
   }
@@ -2068,7 +2080,7 @@ export class PasswordManagerModal extends Modal {
 
   private matchesItemKeyword(item: PasswordItem | DeletedPasswordItem, keyword: string) {
     const groupNames = this.getItemGroups(item).map((group) => group.name);
-    const trashDate = this.isTrashMode() ? this.getTrashDateKey(item as DeletedPasswordItem) : '';
+    const trashDate = this.isTrashMode() && 'deletedAt' in item ? this.getTrashDateKey(item) : '';
     return [item.title, item.username, item.urls.join(' '), item.notes, ...groupNames, trashDate].some((value) => includesKeyword(value, keyword));
   }
 

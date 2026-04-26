@@ -54,7 +54,10 @@ function parseLibraryImportData(payload: unknown): PasswordManagerData {
   }
 
   if (rawPayload && typeof rawPayload === 'object' && 'groups' in rawPayload && 'items' in rawPayload) {
-    return rawPayload;
+    return {
+      groups: rawPayload.groups,
+      items: rawPayload.items,
+    };
   }
 
   throw new Error('Invalid import payload');
