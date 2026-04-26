@@ -655,6 +655,7 @@ export class PasswordManagerModal extends Modal {
             this.updateItemDragMode(event.ctrlKey ? 'add' : 'move', event.dataTransfer ?? undefined);
             const mode = this.dragGroupMode;
             const draggedItemIds = this.getDraggedItemIds();
+            const previousGroupId = this.selectedGroupId;
             const allowed = await this.ensureWriteAccess();
             if (!allowed) {
               return;
@@ -666,14 +667,12 @@ export class PasswordManagerModal extends Modal {
             if (!changed) {
               return;
             }
-            this.selectedGroupId = group.id;
-            this.resetGroupSelection(group.id);
-            this.selectedItemIds = new Set(draggedItemIds.filter((itemId) => this.plugin.getItem(itemId)?.groupIds.includes(group.id)));
-            this.selectedItemId = this.getPreferredSelectedItemId(group.id, this.draggingItemId);
-            if (this.selectedItemId) {
-              this.selectedItemIds.add(this.selectedItemId);
-            }
-            this.itemSelectionAnchorId = this.selectedItemId;
+
+            const nextSelectedGroupId = this.getResolvedSelectedGroupId(previousGroupId);
+            this.selectedGroupId = nextSelectedGroupId;
+            this.resetGroupSelection(nextSelectedGroupId);
+            this.selectedItemId = this.getPreferredSelectedItemId(nextSelectedGroupId);
+            this.resetItemSelection(this.selectedItemId);
             await this.plugin.savePluginData();
             this.render();
           })();
