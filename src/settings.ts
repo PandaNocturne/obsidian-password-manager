@@ -175,11 +175,13 @@ export class PasswordManagerSettingTab extends PluginSettingTab {
         button.setTooltip(PWM_TEXT.SELECT_MARKDOWN_FILE);
         removeFromTabOrder(button.extraSettingsEl);
         button.onClick(() => {
-          new MarkdownFileSuggestModal(this.app, async (file) => {
-            this.plugin.updatePluginConfig({ autoExportMarkdownFilePath: file.path });
-            await this.plugin.savePluginConfig();
-            await this.plugin.syncLibraryMarkdownExport();
-            this.display();
+          new MarkdownFileSuggestModal(this.app, (file) => {
+            void (async () => {
+              this.plugin.updatePluginConfig({ autoExportMarkdownFilePath: file.path });
+              await this.plugin.savePluginConfig();
+              await this.plugin.syncLibraryMarkdownExport();
+              this.display();
+            })();
           }).open();
         });
       });

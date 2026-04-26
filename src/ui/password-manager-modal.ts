@@ -1962,7 +1962,7 @@ export class PasswordManagerModal extends Modal {
             resolve();
           } catch (error) {
             new Notice(PWM_TEXT.IMPORT_FAILED);
-            reject(error);
+            reject(error instanceof Error ? error : new Error(String(error)));
           }
         })();
       }, { once: true });

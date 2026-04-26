@@ -187,10 +187,6 @@ function createEmptyImportedItem(title = ''): Partial<PasswordItem> {
   };
 }
 
-function getPrimaryUrl(item: Pick<PasswordItem, 'urls'> & { url?: string }) {
-  return item.urls[0] ?? item.url ?? '';
-}
-
 function getJoinedUrls(item: Pick<PasswordItem, 'urls'> & { url?: string }) {
   return (item.urls.length ? item.urls : (item.url ? [item.url] : [])).join('\n');
 }
