@@ -7,6 +7,7 @@ import type {
   PasswordManagerExportPayload,
 } from '../util/types';
 import { normalizeImportedLibraryData, normalizeUrls } from './normalize';
+import { DEFAULT_DATA } from './defaults';
 import { createGroup, createItem, reindexOrders } from './password-library-service';
 import { parseCsvGroup, parseImportPayload, parseMarkdownGroup, parseMarkdownItems } from './transfer';
 
@@ -57,6 +58,13 @@ function parseLibraryImportData(payload: unknown): PasswordManagerData {
     return {
       groups: rawPayload.groups,
       items: rawPayload.items,
+      trash: Array.isArray(rawPayload.trash) ? rawPayload.trash : structuredClone(DEFAULT_DATA.trash),
+      view: typeof rawPayload.view === 'object' && rawPayload.view
+        ? rawPayload.view
+        : structuredClone(DEFAULT_DATA.view),
+      settings: typeof rawPayload.settings === 'object' && rawPayload.settings
+        ? rawPayload.settings
+        : structuredClone(DEFAULT_DATA.settings),
     };
   }
 
