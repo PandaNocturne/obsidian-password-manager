@@ -3,7 +3,7 @@
 	"name": "Password Manager",
 	"version": "1.0.4",
 	"minAppVersion": "0.15.0",
-	"description": "A lightweight local password manager for Obsidian with encryption, backup, trash, and import/export support.",
+	"description": "A lightweight local password manager with encryption, backup, trash, and import/export support.",
 	"author": "PandaNocturne",
 	"authorUrl": "https://github.com/PandaNocturne",
 	"isDesktopOnly": true
