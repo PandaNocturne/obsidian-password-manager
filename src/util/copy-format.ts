@@ -53,6 +53,15 @@ function formatNotesForMarkdown(value: string) {
   return `\n${normalized.split(/\r?\n/).map((line) => `    ${line}`).join('\n')}`;
 }
 
+function formatNotesForCallout(value: string) {
+  const normalized = value.trim();
+  if (!normalized) {
+    return '';
+  }
+
+  return `\n${normalized.split(/\r?\n/).map((line) => `>     ${line}`).join('\n')}`;
+}
+
 function getGroupNames(item: PasswordItem, groups: PasswordGroup[]) {
   const groupNameMap = new Map(groups.map((group) => [group.id, group.name]));
   return item.groupIds.map((groupId) => groupNameMap.get(groupId)).filter((name): name is string => !!name && !!name.trim());
@@ -85,7 +94,7 @@ export function formatPasswordItemForCopy(
         `> ${COPY_FIELD_LABELS.username}：${wrapInlineCode(username)}`,
         `> ${COPY_FIELD_LABELS.password}：${wrapInlineCode(password)}`,
         `> ${COPY_FIELD_LABELS.url}：${formatUrlsForStructuredText(urls)}`,
-        `> ${COPY_FIELD_LABELS.notes}：${notes}`,
+        `> ${COPY_FIELD_LABELS.notes}：${formatNotesForCallout(notes)}`,
       ].join('\n');
     case 'markdown':
     default:
