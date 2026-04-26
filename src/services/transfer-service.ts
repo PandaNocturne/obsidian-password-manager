@@ -48,6 +48,10 @@ export class PasswordTransferService {
   }
 
   async syncLibraryMarkdownExport() {
+    if (!this.context.isLibraryDataReady()) {
+      return null;
+    }
+
     const file = await this.ensureLibraryMarkdownExportFile();
     if (!file) {
       return null;
@@ -65,6 +69,10 @@ export class PasswordTransferService {
   }
 
   async ensureLibraryMarkdownExportFile() {
+    if (!this.context.isLibraryDataReady()) {
+      return null;
+    }
+
     const path = this.getMarkdownExportPath();
     if (!path) {
       return null;

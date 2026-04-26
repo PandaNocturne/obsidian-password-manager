@@ -190,6 +190,10 @@ export class PasswordPluginContext {
     };
   }
 
+  isLibraryDataReady() {
+    return !this.hasEncryptedStorage || this.hasUnlockedData;
+  }
+
   setEncryptionState(patch: Partial<ReturnType<PasswordPluginContext['getEncryptionState']>>) {
     if (patch.encryptionPassword !== undefined) {
       this.encryptionPassword = patch.encryptionPassword;
