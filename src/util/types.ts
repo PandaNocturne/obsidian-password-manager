@@ -1,4 +1,4 @@
-import type { PasswordManagerSettings, PasswordPluginConfig } from './settings';
+import type { PasswordManagerSettings } from '../settings';
 
 export type PwmSortMode =
   | 'custom'
@@ -55,15 +55,6 @@ export interface PasswordManagerViewState {
   itemColumnWidth: number;
 }
 
-export interface PasswordManagerSettings {
-  confirmBeforeDelete: boolean;
-  copyFormat: PasswordCopyFormat;
-  showItemUsername: boolean;
-  showItemUrl: boolean;
-  showItemGroupTags: boolean;
-  showItemNotes: boolean;
-}
-
 export interface EncryptedPasswordLibraryPayload {
   version: 1;
   kind: 'encrypted-library';
@@ -80,25 +71,6 @@ export interface EncryptedPasswordVerifier {
   salt: string;
   iv: string;
   cipherText: string;
-}
-
-export interface PasswordPluginConfig {
-  storageFolderName: string;
-  autoBackupEnabled: boolean;
-  autoBackupCount: number;
-  autoBackupIntervalMinutes: number;
-  trashRetentionDays: number;
-  lastAutoBackupAt: number;
-  encryptionEnabled: boolean;
-  encryptionUnlockMode: PasswordUnlockMode;
-  encryptionRecheckIntervalMinutes: number;
-  encryptionVerifier: EncryptedPasswordVerifier | null;
-  persistEncryptionPassword: boolean;
-  savedEncryptionPassword: string;
-  modalWidthExpr: string;
-  modalHeightExpr: string;
-  columnRatioExpr: string;
-  columnRatioLocked: boolean;
 }
 
 export interface PasswordManagerData {

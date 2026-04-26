@@ -133,7 +133,7 @@ export function parsePasswordItemFromCopy(text: string) {
 
     const calloutTitleMatch = line.match(/^>\s*\[!info\]\s*(.*)$/);
     if (calloutTitleMatch) {
-      parsed.title = calloutTitleMatch[1].trim();
+      parsed.title = (calloutTitleMatch[1] ?? '').trim();
       continue;
     }
 

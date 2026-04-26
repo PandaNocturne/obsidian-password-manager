@@ -114,9 +114,10 @@ export function updateItem(data: PasswordManagerData, itemId: string, patch: Par
 
   const nextPatch = { ...patch };
   if ('groupIds' in nextPatch) {
+    const fallbackGroupId = item.groupIds[0] ?? getFallbackGroupId(data) ?? data.groups[0]?.id ?? '';
     nextPatch.groupIds = normalizeGroupIds(
       nextPatch.groupIds,
-      item.groupIds[0] ?? getFallbackGroupId(data),
+      fallbackGroupId,
       data.groups.map((group) => group.id),
     );
   }
@@ -203,10 +204,16 @@ export function moveItemsWithinGroup(data: PasswordManagerData, itemIds: string[
   let orderCursor = 0;
 
   for (let index = 0; index < nextItems.length; index += 1) {
-    if (!visibleIndexSet.has(nextItems[index].id)) {
+    const currentItem = nextItems[index];
+    if (!currentItem || !visibleIndexSet.has(currentItem.id)) {
       continue;
     }
-    nextItems[index] = reordered.find((item) => item.id === reorderedIds[orderCursor]) ?? nextItems[index];
+
+    const reorderedId = reorderedIds[orderCursor];
+    const reorderedItem = reordered.find((item) => item.id === reorderedId);
+    if (reorderedItem) {
+      nextItems[index] = reorderedItem;
+    }
     orderCursor += 1;
   }
 

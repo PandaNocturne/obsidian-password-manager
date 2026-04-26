@@ -158,12 +158,13 @@ export class PasswordManagerModal extends Modal {
       .map((part) => part.trim())
       .filter(Boolean);
 
-    if (parts.length === 0) {
+    const firstPart = parts[0];
+    if (!firstPart) {
       return 'auto';
     }
 
     if (parts.length === 1) {
-      return parts[0];
+      return firstPart;
     }
 
     return `min(${parts.join(', ')})`;
@@ -1420,6 +1421,9 @@ export class PasswordManagerModal extends Modal {
 
     const nextIndex = (currentIndex + direction + inputs.length) % inputs.length;
     const nextInput = inputs[nextIndex];
+    if (!nextInput) {
+      return false;
+    }
     nextInput.focus();
     if ('select' in nextInput && nextInput instanceof HTMLInputElement) {
       nextInput.select();
@@ -1573,6 +1577,9 @@ export class PasswordManagerModal extends Modal {
     onChange: (value: PwmSortMode) => Promise<void>,
   ) {
     const currentOption = options.find((option) => option.value === current) ?? options[0];
+    if (!currentOption) {
+      return;
+    }
     const button = this.plugin.createIconButton(container, SORT_MENU_ICON, `${label}: ${currentOption.label}`, async () => { });
     button.addEventListener('click', (event) => {
       event.preventDefault();
@@ -1732,7 +1739,12 @@ export class PasswordManagerModal extends Modal {
     const visibleGroupIds = new Set(visibleGroups.map((group) => group.id));
     this.selectedGroupIds = new Set([...this.selectedGroupIds].filter((groupId) => visibleGroupIds.has(groupId)));
     if (!this.selectedGroupIds.size && visibleGroups.length) {
-      this.selectedGroupIds.add(this.selectedGroupId && visibleGroupIds.has(this.selectedGroupId) ? this.selectedGroupId : visibleGroups[0].id);
+      const fallbackGroup = this.selectedGroupId && visibleGroupIds.has(this.selectedGroupId)
+        ? this.selectedGroupId
+        : (visibleGroups[0]?.id ?? '');
+      if (fallbackGroup) {
+        this.selectedGroupIds.add(fallbackGroup);
+      }
     }
 
     this.selectedGroupId = this.getResolvedSelectedGroupId([...this.selectedGroupIds][0]);
@@ -1749,7 +1761,8 @@ export class PasswordManagerModal extends Modal {
     const visibleItems = this.getVisibleItems(this.selectedGroupId);
     const visibleItemIds = new Set(visibleItems.map((item) => item.id));
     this.selectedItemIds = new Set([...this.selectedItemIds].filter((itemId) => visibleItemIds.has(itemId)));
-    this.selectedItemId = this.getPreferredSelectedItemId(this.selectedGroupId, [...this.selectedItemIds][0]);
+    const firstSelectedItemId = [...this.selectedItemIds][0] ?? '';
+    this.selectedItemId = this.getPreferredSelectedItemId(this.selectedGroupId, firstSelectedItemId);
     if (this.selectedItemId) {
       this.selectedItemIds.add(this.selectedItemId);
     } else {

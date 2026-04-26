@@ -473,7 +473,7 @@ export class PasswordPluginContext {
       return restoredGroupIds;
     }
 
-    const fallbackGroupId = getFallbackGroupId(this.data) ?? DEFAULT_DATA.groups[0].id;
+    const fallbackGroupId = getFallbackGroupId(this.data) ?? DEFAULT_DATA.groups[0]?.id ?? '';
     return fallbackGroupId ? [fallbackGroupId] : [];
   }
 }

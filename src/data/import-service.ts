@@ -131,7 +131,12 @@ export function importGroupFromText(text: string, data: PasswordManagerData): Pa
 }
 
 export function importItemFromText(text: string, data: PasswordManagerData, groupId: string): PasswordItem {
-  return importItemsFromText(text, data, groupId)[0];
+  const imported = importItemsFromText(text, data, groupId);
+  const firstImported = imported[0];
+  if (!firstImported) {
+    throw new Error('Invalid import payload');
+  }
+  return firstImported;
 }
 
 export function importItemsFromText(text: string, data: PasswordManagerData, groupId: string): PasswordItem[] {

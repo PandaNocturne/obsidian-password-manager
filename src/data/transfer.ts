@@ -218,7 +218,8 @@ function parseGroupedMarkdownGroups(text: string): ParsedMarkdownGroup[] {
       return;
     }
 
-    const [, rawLabel, rawValue] = match;
+    const rawLabel = match[1] ?? '';
+    const rawValue = match[2] ?? '';
     const field = parseMarkdownFieldLabel(rawLabel);
     if (!field) {
       return;
@@ -260,11 +261,12 @@ function parseFlatMarkdownItems(text: string) {
   return sections.map((section) => {
     const lines = section.split('\n');
     const heading = lines.find((line) => line.startsWith('## ') || line.startsWith('### '));
-    const item = createEmptyImportedItem(
-      heading?.startsWith('### ')
+    const title = !heading
+      ? ''
+      : heading.startsWith('### ')
         ? heading.slice(4).trim()
-        : heading?.slice(3).trim() || '',
-    );
+        : heading.slice(3).trim();
+    const item = createEmptyImportedItem(title);
 
     lines.forEach((line) => {
       const match = line.match(/^-\s*([^：:]+)[：:](.*)$/);
@@ -272,7 +274,8 @@ function parseFlatMarkdownItems(text: string) {
         return;
       }
 
-      const [, rawLabel, rawValue] = match;
+      const rawLabel = match[1] ?? '';
+      const rawValue = match[2] ?? '';
       const field = parseMarkdownFieldLabel(rawLabel);
       if (!field) {
         return;
@@ -375,13 +378,14 @@ export async function downloadCsvGroup(filename: string, group: PasswordGroup, i
 
 export function parseMarkdownGroup(text: string) {
   const groups = parseGroupedMarkdownGroups(text).filter((group) => group.items.length > 0);
-  if (!groups.length) {
+  const firstGroup = groups[0];
+  if (!firstGroup) {
     throw new Error('Invalid markdown payload');
   }
 
   return {
-    groupName: groups[0].groupName || PWM_TEXT.importGroupFallbackName,
-    items: groups[0].items,
+    groupName: firstGroup.groupName || PWM_TEXT.importGroupFallbackName,
+    items: firstGroup.items,
   };
 }
 
@@ -392,6 +396,9 @@ export function parseCsvGroup(text: string) {
   }
 
   const headers = rows[0];
+  if (!headers) {
+    throw new Error('Invalid csv payload');
+  }
   const headerMap = new Map(headers.map((header, index) => [normalizeLookupKey(header), index]));
   const groupIndex = getCsvHeaderIndex(headerMap, CSV_HEADER_ALIASES.group);
   const titleIndex = getCsvHeaderIndex(headerMap, CSV_HEADER_ALIASES.title);
