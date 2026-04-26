@@ -9,10 +9,6 @@ const COPY_FIELD_LABELS = {
   notes: PWM_TEXT.COPY_FIELD_NOTES,
 } as const;
 
-function formatLine(label: string, value: string) {
-  return `${label}：${value.trim()}`;
-}
-
 function wrapInlineCode(value: string) {
   const normalized = value.trim();
   return normalized ? `\`${normalized}\`` : '';
@@ -25,10 +21,6 @@ function wrapMarkdownLink(value: string) {
 
 function formatUrls(urls: string[]) {
   return urls.map((url) => url.trim()).filter(Boolean);
-}
-
-function formatUrlsForPlainText(urls: string[]) {
-  return formatUrls(urls).join(' | ');
 }
 
 function formatUrlsForStructuredText(urls: string[]) {
@@ -80,14 +72,6 @@ export function formatPasswordItemForCopy(
   void getGroupNames(item, groups);
 
   switch (format) {
-    case 'plain-text':
-      return [
-        formatLine(COPY_FIELD_LABELS.title, title),
-        formatLine(COPY_FIELD_LABELS.username, username),
-        formatLine(COPY_FIELD_LABELS.password, password),
-        formatLine(COPY_FIELD_LABELS.url, formatUrlsForPlainText(urls)),
-        formatLine(COPY_FIELD_LABELS.notes, notes),
-      ].join('\n');
     case 'callout':
       return [
         `> [!info] ${title}`,
