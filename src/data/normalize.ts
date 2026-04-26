@@ -208,6 +208,10 @@ export function normalizePluginConfig(config: unknown): PasswordPluginConfig {
       typeof source?.exportEmptyGroups === 'boolean'
         ? source.exportEmptyGroups
         : true,
+    exportBlankItems:
+      typeof source?.exportBlankItems === 'boolean'
+        ? source.exportBlankItems
+        : true,
     encryptionEnabled:
       typeof source?.encryptionEnabled === 'boolean'
         ? source.encryptionEnabled

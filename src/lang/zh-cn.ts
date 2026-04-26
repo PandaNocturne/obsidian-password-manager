@@ -53,6 +53,8 @@ export const PWM_TEXT = {
   AUTO_EXPORT_MARKDOWN_FORMAT_SETTING_DESC: '设置导出 Markdown 时使用标题模式还是 Callout 模式。',
   EXPORT_EMPTY_GROUPS_SETTING: '导出空白组',
   EXPORT_EMPTY_GROUPS_SETTING_DESC: '关闭后，Markdown 导出会跳过没有任何条目的分组。',
+  EXPORT_BLANK_ITEMS_SETTING: '导出空白条目',
+  EXPORT_BLANK_ITEMS_SETTING_DESC: '关闭后，Markdown 导出会跳过仅含标题、其余字段均为空的条目。',
   SELECT_MARKDOWN_FILE: '选择 Markdown 文档',
   CLEAR_MARKDOWN_FILE: '清空导出文档',
   OPEN_MARKDOWN_FILE: '打开 Markdown 文档',

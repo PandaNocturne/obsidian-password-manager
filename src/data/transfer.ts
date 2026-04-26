@@ -1,6 +1,14 @@
 import { PWM_TEXT } from '../lang';
 import type { PasswordCopyFormat, PasswordGroup, PasswordItem, PasswordManagerData, PasswordManagerExportPayload } from '../util/types';
 
+function isBlankExportItem(item: PasswordItem) {
+  return !!item.title.trim()
+    && !item.username.trim()
+    && !item.password.trim()
+    && item.urls.every((url) => !url.trim())
+    && !item.notes.trim();
+}
+
 interface ParsedMarkdownGroup {
   groupName: string;
   items: Partial<PasswordItem>[];
@@ -476,11 +484,14 @@ export function exportLibraryToMarkdown(
   items: PasswordItem[],
   format: PasswordCopyFormat,
   exportEmptyGroups: boolean,
+  exportBlankItems: boolean,
 ) {
   return groups
     .map((group) => ({
       group,
-      groupItems: items.filter((item) => item.groupIds.includes(group.id)),
+      groupItems: items
+        .filter((item) => item.groupIds.includes(group.id))
+        .filter((item) => exportBlankItems || !isBlankExportItem(item)),
     }))
     .filter(({ groupItems }) => exportEmptyGroups || groupItems.length > 0)
     .map(({ group, groupItems }) => formatGroupedMarkdown(group.name, groupItems, format))
