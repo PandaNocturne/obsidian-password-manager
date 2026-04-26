@@ -94,6 +94,10 @@ export default class PasswordManagerPlugin extends Plugin {
     this.managerModals.delete(modal);
   }
 
+  closeManagerModals() {
+    Array.from(this.managerModals).forEach((modal) => modal.close());
+  }
+
   refreshManagerLayouts() {
     this.managerModals.forEach((modal) => modal.refreshLayout());
   }
@@ -157,7 +161,11 @@ export default class PasswordManagerPlugin extends Plugin {
   }
 
   async openLibraryMarkdownExportFile() {
-    return this.transferService.openLibraryMarkdownExportFile();
+    const opened = await this.transferService.openLibraryMarkdownExportFile();
+    if (opened) {
+      this.closeManagerModals();
+    }
+    return opened;
   }
 
   getLibraryMarkdownExportFile() {
