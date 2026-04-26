@@ -26,6 +26,7 @@ export interface PasswordPluginConfig {
   autoExportMarkdownFormat: PasswordCopyFormat;
   exportEmptyGroups: boolean;
   exportBlankItems: boolean;
+  exportBlankFields: boolean;
   encryptionEnabled: boolean;
   encryptionUnlockMode: PasswordUnlockMode;
   encryptionRecheckIntervalMinutes: number;
@@ -59,6 +60,7 @@ export const DEFAULT_PASSWORD_PLUGIN_CONFIG: PasswordPluginConfig = {
   autoExportMarkdownFormat: 'markdown',
   exportEmptyGroups: true,
   exportBlankItems: true,
+  exportBlankFields: true,
   encryptionEnabled: false,
   encryptionUnlockMode: 'session',
   encryptionRecheckIntervalMinutes: 30,
@@ -224,6 +226,19 @@ export class PasswordManagerSettingTab extends PluginSettingTab {
           .setValue(this.plugin.pluginConfig.exportBlankItems)
           .onChange(async (value) => {
             this.plugin.updatePluginConfig({ exportBlankItems: value });
+            await this.plugin.savePluginConfig();
+            await this.plugin.syncLibraryMarkdownExport();
+          }),
+      );
+
+    new Setting(containerEl)
+      .setName(PWM_TEXT.EXPORT_BLANK_FIELDS_SETTING)
+      .setDesc(PWM_TEXT.EXPORT_BLANK_FIELDS_SETTING_DESC)
+      .addToggle((toggle) =>
+        toggle
+          .setValue(this.plugin.pluginConfig.exportBlankFields)
+          .onChange(async (value) => {
+            this.plugin.updatePluginConfig({ exportBlankFields: value });
             await this.plugin.savePluginConfig();
             await this.plugin.syncLibraryMarkdownExport();
           }),

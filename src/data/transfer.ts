@@ -199,32 +199,68 @@ function getJoinedUrls(item: Pick<PasswordItem, 'urls'> & { url?: string }) {
   return (item.urls.length ? item.urls : (item.url ? [item.url] : [])).join('\n');
 }
 
-function buildMarkdownItemLines(item: PasswordItem, headingLevel: 2 | 3, format: PasswordCopyFormat) {
+function buildMarkdownItemLines(
+  item: PasswordItem,
+  headingLevel: 2 | 3,
+  format: PasswordCopyFormat,
+  exportBlankFields = true,
+) {
   const headingPrefix = '#'.repeat(headingLevel);
   const title = escapeMarkdownValue(item.title) || PWM_TEXT.UNTITLED_ITEM;
+  const username = wrapInlineCode(item.username);
+  const password = wrapInlineCode(item.password);
+  const urls = format === 'callout' ? formatCalloutUrls(item) : formatMarkdownUrls(item);
+  const notes = format === 'callout' ? formatCalloutIndentedValue(item.notes) : formatMarkdownIndentedValue(item.notes);
+
+  const hasUsername = !!username;
+  const hasPassword = !!password;
+  const hasUrls = !!urls;
+  const hasNotes = !!notes;
 
   if (format === 'callout') {
-    return [
-      `> [!info] ${title}`,
-      `> - ${getMarkdownFieldLabel('username')}：${wrapInlineCode(item.username)}`,
-      `> - ${getMarkdownFieldLabel('password')}：${wrapInlineCode(item.password)}`,
-      `> - ${getMarkdownFieldLabel('url')}：${formatCalloutUrls(item)}`,
-      `> - ${getMarkdownFieldLabel('notes')}：${formatCalloutIndentedValue(item.notes)}`,
-    ].join('\n');
+    const lines = [`> [!info] ${title}`];
+
+    if (exportBlankFields || hasUsername) {
+      lines.push(`> - ${getMarkdownFieldLabel('username')}：${username}`);
+    }
+    if (exportBlankFields || hasPassword) {
+      lines.push(`> - ${getMarkdownFieldLabel('password')}：${password}`);
+    }
+    if (exportBlankFields || hasUrls) {
+      lines.push(`> - ${getMarkdownFieldLabel('url')}：${urls}`);
+    }
+    if (exportBlankFields || hasNotes) {
+      lines.push(`> - ${getMarkdownFieldLabel('notes')}：${notes}`);
+    }
+
+    return lines.join('\n');
   }
 
-  return [
-    `${headingPrefix} ${title}`,
-    '',
-    `- ${getMarkdownFieldLabel('username')}：${wrapInlineCode(item.username)}`,
-    `- ${getMarkdownFieldLabel('password')}：${wrapInlineCode(item.password)}`,
-    `- ${getMarkdownFieldLabel('url')}：${formatMarkdownUrls(item)}`,
-    `- ${getMarkdownFieldLabel('notes')}：${formatMarkdownIndentedValue(item.notes)}`,
-  ].join('\n');
+  const lines = [`${headingPrefix} ${title}`, ''];
+
+  if (exportBlankFields || hasUsername) {
+    lines.push(`- ${getMarkdownFieldLabel('username')}：${username}`);
+  }
+  if (exportBlankFields || hasPassword) {
+    lines.push(`- ${getMarkdownFieldLabel('password')}：${password}`);
+  }
+  if (exportBlankFields || hasUrls) {
+    lines.push(`- ${getMarkdownFieldLabel('url')}：${urls}`);
+  }
+  if (exportBlankFields || hasNotes) {
+    lines.push(`- ${getMarkdownFieldLabel('notes')}：${notes}`);
+  }
+
+  return lines.join('\n');
 }
 
-function formatGroupedMarkdown(groupName: string, items: PasswordItem[], format: PasswordCopyFormat) {
-  const itemBlocks = items.map((item) => buildMarkdownItemLines(item, 3, format));
+function formatGroupedMarkdown(
+  groupName: string,
+  items: PasswordItem[],
+  format: PasswordCopyFormat,
+  exportBlankFields = true,
+) {
+  const itemBlocks = items.map((item) => buildMarkdownItemLines(item, 3, format, exportBlankFields));
   return [
     `## ${escapeMarkdownValue(groupName) || PWM_TEXT.UNTITLED_GROUP}`,
     ...itemBlocks,
@@ -453,10 +489,16 @@ export function downloadMarkdownItems(
   items: PasswordItem[],
   groups: PasswordGroup[],
   format: PasswordCopyFormat,
+  exportBlankFields = true,
 ) {
   const groupedContent = groups
     .filter((group) => items.some((item) => item.groupIds.includes(group.id)))
-    .map((group) => formatGroupedMarkdown(group.name, items.filter((item) => item.groupIds.includes(group.id)), format))
+    .map((group) => formatGroupedMarkdown(
+      group.name,
+      items.filter((item) => item.groupIds.includes(group.id)),
+      format,
+      exportBlankFields,
+    ))
     .join('\n\n');
 
   downloadText(filename, groupedContent, 'text/markdown;charset=utf-8');
@@ -466,17 +508,24 @@ export function downloadMarkdownGroups(
   filename: string,
   groupsWithItems: Array<{ group: PasswordGroup; items: PasswordItem[] }>,
   format: PasswordCopyFormat,
+  exportBlankFields = true,
 ) {
   const content = groupsWithItems
     .filter(({ items }) => items.length > 0)
-    .map(({ group, items }) => formatGroupedMarkdown(group.name, items, format))
+    .map(({ group, items }) => formatGroupedMarkdown(group.name, items, format, exportBlankFields))
     .join('\n\n');
 
   downloadText(filename, content, 'text/markdown;charset=utf-8');
 }
 
-export function downloadMarkdownGroup(filename: string, group: PasswordGroup, items: PasswordItem[], format: PasswordCopyFormat) {
-  downloadText(filename, formatGroupedMarkdown(group.name, items, format), 'text/markdown;charset=utf-8');
+export function downloadMarkdownGroup(
+  filename: string,
+  group: PasswordGroup,
+  items: PasswordItem[],
+  format: PasswordCopyFormat,
+  exportBlankFields = true,
+) {
+  downloadText(filename, formatGroupedMarkdown(group.name, items, format, exportBlankFields), 'text/markdown;charset=utf-8');
 }
 
 export function exportLibraryToMarkdown(
@@ -485,6 +534,7 @@ export function exportLibraryToMarkdown(
   format: PasswordCopyFormat,
   exportEmptyGroups: boolean,
   exportBlankItems: boolean,
+  exportBlankFields: boolean,
 ) {
   return groups
     .map((group) => ({
@@ -494,7 +544,7 @@ export function exportLibraryToMarkdown(
         .filter((item) => exportBlankItems || !isBlankExportItem(item)),
     }))
     .filter(({ groupItems }) => exportEmptyGroups || groupItems.length > 0)
-    .map(({ group, groupItems }) => formatGroupedMarkdown(group.name, groupItems, format))
+    .map(({ group, groupItems }) => formatGroupedMarkdown(group.name, groupItems, format, exportBlankFields))
     .filter(Boolean)
     .join('\n\n');
 }

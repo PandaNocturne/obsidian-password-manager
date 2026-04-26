@@ -55,6 +55,8 @@ export const PWM_TEXT = {
   EXPORT_EMPTY_GROUPS_SETTING_DESC: 'When disabled, groups without any items are skipped during Markdown export.',
   EXPORT_BLANK_ITEMS_SETTING: 'Export blank items',
   EXPORT_BLANK_ITEMS_SETTING_DESC: 'When disabled, items with only a title and all other fields empty are skipped during Markdown export.',
+  EXPORT_BLANK_FIELDS_SETTING: 'Export blank fields',
+  EXPORT_BLANK_FIELDS_SETTING_DESC: 'When disabled, fields without a value are skipped during Markdown export.',
   SELECT_MARKDOWN_FILE: 'Select Markdown file',
   CLEAR_MARKDOWN_FILE: 'Clear export file',
   OPEN_MARKDOWN_FILE: 'Open Markdown file',

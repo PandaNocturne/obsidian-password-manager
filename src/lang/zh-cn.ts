@@ -55,6 +55,8 @@ export const PWM_TEXT = {
   EXPORT_EMPTY_GROUPS_SETTING_DESC: '关闭后，Markdown 导出会跳过没有任何条目的分组。',
   EXPORT_BLANK_ITEMS_SETTING: '导出空白条目',
   EXPORT_BLANK_ITEMS_SETTING_DESC: '关闭后，Markdown 导出会跳过仅含标题、其余字段均为空的条目。',
+  EXPORT_BLANK_FIELDS_SETTING: '导出空白项',
+  EXPORT_BLANK_FIELDS_SETTING_DESC: '关闭后，Markdown 导出会跳过没有值的属性。',
   SELECT_MARKDOWN_FILE: '选择 Markdown 文档',
   CLEAR_MARKDOWN_FILE: '清空导出文档',
   OPEN_MARKDOWN_FILE: '打开 Markdown 文档',

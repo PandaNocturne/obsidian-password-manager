@@ -63,6 +63,7 @@ export class PasswordTransferService {
       this.context.pluginConfig.autoExportMarkdownFormat,
       this.context.pluginConfig.exportEmptyGroups,
       this.context.pluginConfig.exportBlankItems,
+      this.context.pluginConfig.exportBlankFields,
     );
     const existingContent = await this.app.vault.read(file);
     const content = this.mergeMarkdownBodyPreservingFrontmatter(existingContent, body);
@@ -96,6 +97,7 @@ export class PasswordTransferService {
       this.context.pluginConfig.autoExportMarkdownFormat,
       this.context.pluginConfig.exportEmptyGroups,
       this.context.pluginConfig.exportBlankItems,
+      this.context.pluginConfig.exportBlankFields,
     );
     return this.app.vault.create(path, initialContent);
   }
@@ -134,6 +136,7 @@ export class PasswordTransferService {
         group,
         items,
         this.context.pluginConfig.autoExportMarkdownFormat,
+        this.context.pluginConfig.exportBlankFields,
       );
     } else {
       downloadJson(appendDateTimeSuffix(`${group.name || 'group'}.json`, exportedAt), {
@@ -175,6 +178,7 @@ export class PasswordTransferService {
         appendDateTimeSuffix('export-groups.md', exportedAt),
         groupsWithItems,
         this.context.pluginConfig.autoExportMarkdownFormat,
+        this.context.pluginConfig.exportBlankFields,
       );
     } else {
       downloadJson(appendDateTimeSuffix('export-groups.json', exportedAt), {
@@ -221,6 +225,7 @@ export class PasswordTransferService {
         items,
         this.context.data.groups,
         this.context.pluginConfig.autoExportMarkdownFormat,
+        this.context.pluginConfig.exportBlankFields,
       );
     } else {
       downloadJson(appendDateTimeSuffix('export-items.json', exportedAt), {
