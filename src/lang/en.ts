@@ -74,7 +74,6 @@ export const PWM_TEXT = {
   COPY_FORMAT_SETTING: 'Copy format',
   COPY_FORMAT_SETTING_DESC: 'Set the format used when copying password information to the clipboard.',
   COPY_FORMAT_MARKDOWN: 'Heading mode',
-  COPY_FORMAT_PLAIN_TEXT: 'Plain text format',
   COPY_FORMAT_CALLOUT: 'Callout format',
   STORAGE_FOLDER_SETTING: 'Data storage folder',
   STORAGE_FOLDER_SETTING_DESC: 'Password data will be saved in this folder under the vault root, including data.json and backup/. The default folder is .password.',

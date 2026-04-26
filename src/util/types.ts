@@ -12,7 +12,7 @@ export type PwmSortMode =
   | 'deleted-desc'
   | 'item-count-asc'
   | 'item-count-desc';
-export type PasswordCopyFormat = 'markdown' | 'plain-text' | 'callout';
+export type PasswordCopyFormat = 'markdown' | 'callout';
 export type PasswordUnlockMode = 'session' | 'interval' | 'always';
 
 export interface PasswordItem {

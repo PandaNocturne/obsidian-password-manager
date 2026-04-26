@@ -127,7 +127,6 @@ export class PasswordManagerSettingTab extends PluginSettingTab {
       .addDropdown((dropdown) =>
         dropdown
           .addOption('markdown', PWM_TEXT.COPY_FORMAT_MARKDOWN)
-          .addOption('plain-text', PWM_TEXT.COPY_FORMAT_PLAIN_TEXT)
           .addOption('callout', PWM_TEXT.COPY_FORMAT_CALLOUT)
           .setValue(this.plugin.data.settings.copyFormat)
           .onChange(async (value: PasswordCopyFormat) => {

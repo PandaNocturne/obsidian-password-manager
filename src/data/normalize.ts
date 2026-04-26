@@ -301,7 +301,7 @@ function normalizeEncryptionVerifier(value: unknown): EncryptedPasswordVerifier 
 }
 
 export function normalizeCopyFormat(format: unknown): PasswordCopyFormat {
-  const formats: PasswordCopyFormat[] = ['markdown', 'plain-text', 'callout'];
+  const formats: PasswordCopyFormat[] = ['markdown', 'callout'];
   return formats.includes(format as PasswordCopyFormat)
     ? (format as PasswordCopyFormat)
     : DEFAULT_DATA.settings.copyFormat;
