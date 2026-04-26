@@ -12,7 +12,7 @@ function touchItem(item: PasswordItem) {
 export function createGroup(data: PasswordManagerData, name?: string) {
   const group: PasswordGroup = {
     id: createId(),
-    name: name?.trim() || `${PWM_TEXT.generatedNewGroupName} ${data.groups.length + 1}`,
+    name: name?.trim() || `${PWM_TEXT.GENERATED_NEW_GROUP_NAME} ${data.groups.length + 1}`,
     createdAt: Date.now(),
     order: data.groups.length,
   };
@@ -24,12 +24,12 @@ export function createGroup(data: PasswordManagerData, name?: string) {
 export function updateGroupName(data: PasswordManagerData, groupId: string, name: string) {
   const group = data.groups.find((item) => item.id === groupId);
   if (!group) {
-    return PWM_TEXT.groupNotFound;
+    return PWM_TEXT.GROUP_NOT_FOUND;
   }
 
   const validationError = validateFileSafeName(name);
   if (validationError) {
-    return formatPWMText(PWM_TEXT.invalidGroupNameWithReason, { reason: validationError });
+    return formatPWMText(PWM_TEXT.INVALID_GROUP_NAME_WITH_REASON, { reason: validationError });
   }
 
   const nextName = name.trim();
@@ -46,7 +46,7 @@ export function createItem(data: PasswordManagerData, groupId: string) {
   const item: PasswordItem = {
     id: createId(),
     groupIds: [groupId],
-    title: PWM_TEXT.generatedNewItemTitle,
+    title: PWM_TEXT.GENERATED_NEW_ITEM_TITLE,
     username: '',
     password: '',
     urls: [],
@@ -88,12 +88,12 @@ export function duplicateItem(data: PasswordManagerData, itemId: string) {
 export function updateItemTitle(data: PasswordManagerData, itemId: string, title: string) {
   const item = data.items.find((entry) => entry.id === itemId);
   if (!item) {
-    return PWM_TEXT.itemNotFound;
+    return PWM_TEXT.ITEM_NOT_FOUND;
   }
 
   const validationError = validateFileSafeName(title);
   if (validationError) {
-    return formatPWMText(PWM_TEXT.invalidItemTitleWithReason, { reason: validationError });
+    return formatPWMText(PWM_TEXT.INVALID_ITEM_TITLE_WITH_REASON, { reason: validationError });
   }
 
   const nextTitle = title.trim();

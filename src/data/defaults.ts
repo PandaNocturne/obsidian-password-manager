@@ -8,7 +8,7 @@ export const DEFAULT_DATA: PasswordManagerData = {
   groups: [
     {
       id: 'default-group',
-      name: PWM_TEXT.defaultGroupName,
+      name: PWM_TEXT.DEFAULT_GROUP_NAME,
       createdAt: now,
       order: 0,
     },
@@ -17,8 +17,8 @@ export const DEFAULT_DATA: PasswordManagerData = {
     {
       id: 'default-item',
       groupIds: ['default-group'],
-      title: PWM_TEXT.defaultItemTitle,
-      username: PWM_TEXT.defaultItemUsername,
+      title: PWM_TEXT.DEFAULT_ITEM_TITLE,
+      username: PWM_TEXT.DEFAULT_ITEM_USERNAME,
       password: 'password',
       urls: [],
       notes: '',

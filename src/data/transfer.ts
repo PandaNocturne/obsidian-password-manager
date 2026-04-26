@@ -7,11 +7,11 @@ interface ParsedMarkdownGroup {
 }
 
 const MARKDOWN_FIELD_LABELS = {
-  username: [PWM_TEXT.copyFieldUsername, 'Username'],
-  password: [PWM_TEXT.copyFieldPassword, 'Password'],
-  url: [PWM_TEXT.copyFieldUrl, 'URL', 'Link'],
-  notes: [PWM_TEXT.copyFieldNotes, 'Notes'],
-  groupTags: [PWM_TEXT.copyFieldGroupTags, 'Group Tags'],
+  username: [PWM_TEXT.COPY_FIELD_USERNAME, 'Username'],
+  password: [PWM_TEXT.COPY_FIELD_PASSWORD, 'Password'],
+  url: [PWM_TEXT.COPY_FIELD_URL, 'URL', 'Link'],
+  notes: [PWM_TEXT.COPY_FIELD_NOTES, 'Notes'],
+  groupTags: [PWM_TEXT.COPY_FIELD_GROUP_TAGS, 'Group Tags'],
 } as const;
 
 const CSV_HEADER_ALIASES = {
@@ -158,7 +158,7 @@ function getJoinedUrls(item: Pick<PasswordItem, 'urls'> & { url?: string }) {
 function buildMarkdownItemLines(item: PasswordItem, headingLevel: 2 | 3) {
   const headingPrefix = '#'.repeat(headingLevel);
   return [
-    `${headingPrefix} ${escapeMarkdownValue(item.title) || PWM_TEXT.untitledItem}`,
+    `${headingPrefix} ${escapeMarkdownValue(item.title) || PWM_TEXT.UNTITLED_ITEM}`,
     '',
     `- ${getMarkdownFieldLabel('username')}：${wrapInlineCode(item.username)}`,
     `- ${getMarkdownFieldLabel('password')}：${wrapInlineCode(item.password)}`,
@@ -170,7 +170,7 @@ function buildMarkdownItemLines(item: PasswordItem, headingLevel: 2 | 3) {
 function formatGroupedMarkdown(groupName: string, items: PasswordItem[]) {
   const itemBlocks = items.map((item) => buildMarkdownItemLines(item, 3));
   return [
-    `## ${escapeMarkdownValue(groupName) || PWM_TEXT.untitledGroup}`,
+    `## ${escapeMarkdownValue(groupName) || PWM_TEXT.UNTITLED_GROUP}`,
     '',
     ...itemBlocks,
   ].join('\n\n');
@@ -384,7 +384,7 @@ export function parseMarkdownGroup(text: string) {
   }
 
   return {
-    groupName: firstGroup.groupName || PWM_TEXT.importGroupFallbackName,
+    groupName: firstGroup.groupName || PWM_TEXT.IMPORT_GROUP_FALLBACK_NAME,
     items: firstGroup.items,
   };
 }
@@ -415,7 +415,7 @@ export function parseCsvGroup(text: string) {
 
   const dataRows = rows.slice(1);
   return {
-    groupName: dataRows[0]?.[groupIndex]?.trim() || PWM_TEXT.importGroupFallbackName,
+    groupName: dataRows[0]?.[groupIndex]?.trim() || PWM_TEXT.IMPORT_GROUP_FALLBACK_NAME,
     items: dataRows.map((row) => ({
       title: row[titleIndex]?.trim() || '',
       username: row[usernameIndex ?? -1]?.trim() || '',

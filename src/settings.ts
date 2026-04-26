@@ -80,12 +80,12 @@ export class PasswordManagerSettingTab extends PluginSettingTab {
     containerEl.empty();
 
     new Setting(containerEl)
-      .setName(PWM_TEXT.settingsTitle)
+      .setName(PWM_TEXT.SETTINGS_TITLE)
       .setHeading();
 
     new Setting(containerEl)
-      .setName(PWM_TEXT.storageFolderSetting)
-      .setDesc(PWM_TEXT.storageFolderSettingDesc)
+      .setName(PWM_TEXT.STORAGE_FOLDER_SETTING)
+      .setDesc(PWM_TEXT.STORAGE_FOLDER_SETTING_DESC)
       .addText((text) =>
         text
           .setPlaceholder('.password')
@@ -97,7 +97,7 @@ export class PasswordManagerSettingTab extends PluginSettingTab {
       )
       .addExtraButton((button) => {
         button.setIcon('folder-open');
-        button.setTooltip(PWM_TEXT.openStorageFolder);
+        button.setTooltip(PWM_TEXT.OPEN_STORAGE_FOLDER);
         removeFromTabOrder(button.extraSettingsEl);
         button.onClick(async () => {
           await this.plugin.openStorageFolder();
@@ -105,8 +105,8 @@ export class PasswordManagerSettingTab extends PluginSettingTab {
       });
 
     new Setting(containerEl)
-      .setName(PWM_TEXT.confirmDeleteSetting)
-      .setDesc(PWM_TEXT.confirmDeleteSettingDesc)
+      .setName(PWM_TEXT.CONFIRM_DELETE_SETTING)
+      .setDesc(PWM_TEXT.CONFIRM_DELETE_SETTING_DESC)
       .addToggle((toggle) =>
         toggle
           .setValue(this.plugin.data.settings.confirmBeforeDelete)
@@ -117,13 +117,13 @@ export class PasswordManagerSettingTab extends PluginSettingTab {
       );
 
     new Setting(containerEl)
-      .setName(PWM_TEXT.copyFormatSetting)
-      .setDesc(PWM_TEXT.copyFormatSettingDesc)
+      .setName(PWM_TEXT.COPY_FORMAT_SETTING)
+      .setDesc(PWM_TEXT.COPY_FORMAT_SETTING_DESC)
       .addDropdown((dropdown) =>
         dropdown
-          .addOption('markdown', PWM_TEXT.copyFormatMarkdown)
-          .addOption('plain-text', PWM_TEXT.copyFormatPlainText)
-          .addOption('callout', PWM_TEXT.copyFormatCallout)
+          .addOption('markdown', PWM_TEXT.COPY_FORMAT_MARKDOWN)
+          .addOption('plain-text', PWM_TEXT.COPY_FORMAT_PLAIN_TEXT)
+          .addOption('callout', PWM_TEXT.COPY_FORMAT_CALLOUT)
           .setValue(this.plugin.data.settings.copyFormat)
           .onChange(async (value: PasswordCopyFormat) => {
             this.plugin.updateSettings({ copyFormat: value });
@@ -132,12 +132,12 @@ export class PasswordManagerSettingTab extends PluginSettingTab {
       );
 
     new Setting(containerEl)
-      .setName(PWM_TEXT.modalSettingsTitle)
+      .setName(PWM_TEXT.MODAL_SETTINGS_TITLE)
       .setHeading();
 
     new Setting(containerEl)
-      .setName(PWM_TEXT.modalWidthSetting)
-      .setDesc(PWM_TEXT.modalWidthSettingDesc)
+      .setName(PWM_TEXT.MODAL_WIDTH_SETTING)
+      .setDesc(PWM_TEXT.MODAL_WIDTH_SETTING_DESC)
       .addText((text) =>
         text
           .setPlaceholder('92vw, 1200px')
@@ -149,8 +149,8 @@ export class PasswordManagerSettingTab extends PluginSettingTab {
       );
 
     new Setting(containerEl)
-      .setName(PWM_TEXT.modalHeightSetting)
-      .setDesc(PWM_TEXT.modalHeightSettingDesc)
+      .setName(PWM_TEXT.MODAL_HEIGHT_SETTING)
+      .setDesc(PWM_TEXT.MODAL_HEIGHT_SETTING_DESC)
       .addText((text) =>
         text
           .setPlaceholder('80vh, 800px')
@@ -162,8 +162,8 @@ export class PasswordManagerSettingTab extends PluginSettingTab {
       );
 
     new Setting(containerEl)
-      .setName(PWM_TEXT.columnRatioSetting)
-      .setDesc(PWM_TEXT.columnRatioSettingDesc)
+      .setName(PWM_TEXT.COLUMN_RATIO_SETTING)
+      .setDesc(PWM_TEXT.COLUMN_RATIO_SETTING_DESC)
       .addText((text) => {
         const applyColumnRatio = async () => {
           this.plugin.updatePluginConfig({ columnRatioExpr: text.getValue() });
@@ -190,7 +190,7 @@ export class PasswordManagerSettingTab extends PluginSettingTab {
       })
       .addExtraButton((button) => {
         button.setIcon('reset');
-        button.setTooltip(PWM_TEXT.columnRatioReset);
+        button.setTooltip(PWM_TEXT.COLUMN_RATIO_RESET);
         removeFromTabOrder(button.extraSettingsEl);
         button.onClick(async () => {
           this.plugin.updatePluginConfig({ columnRatioExpr: '1,1,2', columnRatioLocked: true });
@@ -201,13 +201,13 @@ export class PasswordManagerSettingTab extends PluginSettingTab {
       });
 
     new Setting(containerEl)
-      .setName(PWM_TEXT.encryptionSettingsTitle)
-      .setDesc(PWM_TEXT.encryptionSettingsTitleDesc)
+      .setName(PWM_TEXT.ENCRYPTION_SETTINGS_TITLE)
+      .setDesc(PWM_TEXT.ENCRYPTION_SETTINGS_TITLE_DESC)
       .setHeading();
 
     new Setting(containerEl)
-      .setName(PWM_TEXT.encryptionEnabledSetting)
-      .setDesc(PWM_TEXT.encryptionEnabledSettingDesc)
+      .setName(PWM_TEXT.ENCRYPTION_ENABLED_SETTING)
+      .setDesc(PWM_TEXT.ENCRYPTION_ENABLED_SETTING_DESC)
       .addToggle((toggle) =>
         toggle
           .setValue(this.plugin.pluginConfig.encryptionEnabled)
@@ -236,13 +236,13 @@ export class PasswordManagerSettingTab extends PluginSettingTab {
 
     if (this.plugin.pluginConfig.encryptionEnabled) {
       new Setting(containerEl)
-        .setName(PWM_TEXT.encryptionUnlockModeSetting)
-        .setDesc(PWM_TEXT.encryptionUnlockModeSettingDesc)
+        .setName(PWM_TEXT.ENCRYPTION_UNLOCK_MODE_SETTING)
+        .setDesc(PWM_TEXT.ENCRYPTION_UNLOCK_MODE_SETTING_DESC)
         .addDropdown((dropdown) =>
           dropdown
-            .addOption('session', PWM_TEXT.encryptionUnlockModeSession)
-            .addOption('interval', PWM_TEXT.encryptionUnlockModeInterval)
-            .addOption('always', PWM_TEXT.encryptionUnlockModeAlways)
+            .addOption('session', PWM_TEXT.ENCRYPTION_UNLOCK_MODE_SESSION)
+            .addOption('interval', PWM_TEXT.ENCRYPTION_UNLOCK_MODE_INTERVAL)
+            .addOption('always', PWM_TEXT.ENCRYPTION_UNLOCK_MODE_ALWAYS)
             .setValue(this.plugin.pluginConfig.encryptionUnlockMode)
             .onChange(async (value: PasswordUnlockMode) => {
               this.plugin.updatePluginConfig({ encryptionUnlockMode: value });
@@ -252,8 +252,8 @@ export class PasswordManagerSettingTab extends PluginSettingTab {
         );
 
       new Setting(containerEl)
-        .setName(PWM_TEXT.persistEncryptionPasswordSetting)
-        .setDesc(PWM_TEXT.persistEncryptionPasswordSettingDesc)
+        .setName(PWM_TEXT.PERSIST_ENCRYPTION_PASSWORD_SETTING)
+        .setDesc(PWM_TEXT.PERSIST_ENCRYPTION_PASSWORD_SETTING_DESC)
         .addToggle((toggle) =>
           toggle
             .setValue(this.plugin.pluginConfig.persistEncryptionPassword)
@@ -265,8 +265,8 @@ export class PasswordManagerSettingTab extends PluginSettingTab {
 
       if (this.plugin.pluginConfig.encryptionUnlockMode === 'interval') {
         new Setting(containerEl)
-          .setName(PWM_TEXT.encryptionRecheckIntervalSetting)
-          .setDesc(PWM_TEXT.encryptionRecheckIntervalSettingDesc)
+          .setName(PWM_TEXT.ENCRYPTION_RECHECK_INTERVAL_SETTING)
+          .setDesc(PWM_TEXT.ENCRYPTION_RECHECK_INTERVAL_SETTING_DESC)
           .addText((text) =>
             text
               .setPlaceholder('30')
@@ -279,7 +279,7 @@ export class PasswordManagerSettingTab extends PluginSettingTab {
           )
           .addExtraButton((button) => {
             button.setIcon('reset');
-            button.setTooltip(PWM_TEXT.encryptionRecheckIntervalReset);
+            button.setTooltip(PWM_TEXT.ENCRYPTION_RECHECK_INTERVAL_RESET);
             removeFromTabOrder(button.extraSettingsEl);
             button.onClick(async () => {
               this.plugin.updatePluginConfig({ encryptionRecheckIntervalMinutes: 30 });
@@ -290,9 +290,9 @@ export class PasswordManagerSettingTab extends PluginSettingTab {
       }
 
       new Setting(containerEl)
-        .setName(PWM_TEXT.changeEncryptionPassword)
+        .setName(PWM_TEXT.CHANGE_ENCRYPTION_PASSWORD)
         .addButton((button) => {
-          button.setButtonText(PWM_TEXT.changeEncryptionPasswordAction);
+          button.setButtonText(PWM_TEXT.CHANGE_ENCRYPTION_PASSWORD_ACTION);
           removeFromTabOrder(button.buttonEl);
           button.onClick(async () => {
             const success = await this.plugin.changeEncryptionPassword();
@@ -304,14 +304,14 @@ export class PasswordManagerSettingTab extends PluginSettingTab {
     }
 
     new Setting(containerEl)
-      .setName(PWM_TEXT.backupSettingsTitle)
+      .setName(PWM_TEXT.BACKUP_SETTINGS_TITLE)
       .setHeading();
 
     new Setting(containerEl)
-      .setName(PWM_TEXT.createBackupNow)
-      .setDesc(PWM_TEXT.createBackupNowDesc)
+      .setName(PWM_TEXT.CREATE_BACKUP_NOW)
+      .setDesc(PWM_TEXT.CREATE_BACKUP_NOW_DESC)
       .addButton((button) => {
-        button.setButtonText(PWM_TEXT.createBackupNow);
+        button.setButtonText(PWM_TEXT.CREATE_BACKUP_NOW);
         removeFromTabOrder(button.buttonEl);
         button.onClick(async () => {
           await this.plugin.createBackupNow();
@@ -319,8 +319,8 @@ export class PasswordManagerSettingTab extends PluginSettingTab {
       });
 
     new Setting(containerEl)
-      .setName(PWM_TEXT.autoBackupEnabledSetting)
-      .setDesc(PWM_TEXT.autoBackupEnabledSettingDesc)
+      .setName(PWM_TEXT.AUTO_BACKUP_ENABLED_SETTING)
+      .setDesc(PWM_TEXT.AUTO_BACKUP_ENABLED_SETTING_DESC)
       .addToggle((toggle) =>
         toggle
           .setValue(this.plugin.pluginConfig.autoBackupEnabled)
@@ -331,8 +331,8 @@ export class PasswordManagerSettingTab extends PluginSettingTab {
       );
 
     new Setting(containerEl)
-      .setName(PWM_TEXT.autoBackupCountSetting)
-      .setDesc(PWM_TEXT.autoBackupCountSettingDesc)
+      .setName(PWM_TEXT.AUTO_BACKUP_COUNT_SETTING)
+      .setDesc(PWM_TEXT.AUTO_BACKUP_COUNT_SETTING_DESC)
       .addSlider((slider) =>
         slider
           .setLimits(0, 50, 1)
@@ -345,7 +345,7 @@ export class PasswordManagerSettingTab extends PluginSettingTab {
       )
       .addExtraButton((button) => {
         button.setIcon('reset');
-        button.setTooltip(PWM_TEXT.autoBackupCountReset);
+        button.setTooltip(PWM_TEXT.AUTO_BACKUP_COUNT_RESET);
         removeFromTabOrder(button.extraSettingsEl);
         button.onClick(async () => {
           this.plugin.updatePluginConfig({ autoBackupCount: 20 });
@@ -355,8 +355,8 @@ export class PasswordManagerSettingTab extends PluginSettingTab {
       });
 
     new Setting(containerEl)
-      .setName(PWM_TEXT.autoBackupIntervalSetting)
-      .setDesc(PWM_TEXT.autoBackupIntervalSettingDesc)
+      .setName(PWM_TEXT.AUTO_BACKUP_INTERVAL_SETTING)
+      .setDesc(PWM_TEXT.AUTO_BACKUP_INTERVAL_SETTING_DESC)
       .addSlider((slider) =>
         slider
           .setLimits(1, 60, 1)
@@ -369,7 +369,7 @@ export class PasswordManagerSettingTab extends PluginSettingTab {
       )
       .addExtraButton((button) => {
         button.setIcon('reset');
-        button.setTooltip(PWM_TEXT.autoBackupIntervalReset);
+        button.setTooltip(PWM_TEXT.AUTO_BACKUP_INTERVAL_RESET);
         removeFromTabOrder(button.extraSettingsEl);
         button.onClick(async () => {
           this.plugin.updatePluginConfig({ autoBackupIntervalMinutes: 5 });
@@ -379,8 +379,8 @@ export class PasswordManagerSettingTab extends PluginSettingTab {
       });
 
     new Setting(containerEl)
-      .setName(PWM_TEXT.trashRetentionDaysSetting)
-      .setDesc(PWM_TEXT.trashRetentionDaysSettingDesc)
+      .setName(PWM_TEXT.TRASH_RETENTION_DAYS_SETTING)
+      .setDesc(PWM_TEXT.TRASH_RETENTION_DAYS_SETTING_DESC)
       .addSlider((slider) =>
         slider
           .setLimits(0, 365, 1)
@@ -393,7 +393,7 @@ export class PasswordManagerSettingTab extends PluginSettingTab {
       )
       .addExtraButton((button) => {
         button.setIcon('reset');
-        button.setTooltip(PWM_TEXT.trashRetentionDaysReset);
+        button.setTooltip(PWM_TEXT.TRASH_RETENTION_DAYS_RESET);
         removeFromTabOrder(button.extraSettingsEl);
         button.onClick(async () => {
           this.plugin.updatePluginConfig({ trashRetentionDays: 150 });

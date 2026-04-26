@@ -47,13 +47,13 @@ export default class PasswordManagerPlugin extends Plugin {
   }
 
   private registerEntrypoints() {
-    this.addRibbonIcon('lock', PWM_TEXT.openManager, () => {
+    this.addRibbonIcon('lock', PWM_TEXT.OPEN_MANAGER, () => {
       void this.openManager();
     });
 
     this.addCommand({
       id: 'open-manager',
-      name: PWM_TEXT.openManager,
+      name: PWM_TEXT.OPEN_MANAGER,
       callback: () => {
         void this.openManager();
       },

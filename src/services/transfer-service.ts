@@ -35,7 +35,7 @@ export class PasswordTransferService {
       if (!exported) {
         throw new Error('Failed to export encrypted library');
       }
-      new Notice(PWM_TEXT.exportSuccess);
+      new Notice(PWM_TEXT.EXPORT_SUCCESS);
       return;
     }
 
@@ -45,7 +45,7 @@ export class PasswordTransferService {
       exportedAt,
       data: this.context.data,
     });
-    new Notice(PWM_TEXT.exportSuccess);
+    new Notice(PWM_TEXT.EXPORT_SUCCESS);
   }
 
   async exportGroup(groupId: string, format: 'json' | 'markdown' | 'csv' = 'json') {
@@ -110,7 +110,7 @@ export class PasswordTransferService {
       });
     }
 
-    new Notice(PWM_TEXT.exportSuccess);
+    new Notice(PWM_TEXT.EXPORT_SUCCESS);
   }
 
   async exportItem(itemId: string) {
@@ -126,7 +126,7 @@ export class PasswordTransferService {
       exportedAt,
       data: item,
     });
-    new Notice(PWM_TEXT.exportSuccess);
+    new Notice(PWM_TEXT.EXPORT_SUCCESS);
   }
 
   async exportItems(itemIds: string[], format: 'json' | 'markdown') {
@@ -148,7 +148,7 @@ export class PasswordTransferService {
         data: items,
       });
     }
-    new Notice(PWM_TEXT.exportSuccess);
+    new Notice(PWM_TEXT.EXPORT_SUCCESS);
   }
 
   async importLibraryFromText(text: string) {
@@ -156,10 +156,10 @@ export class PasswordTransferService {
       const encryptedImport = isEncryptedLibraryImportText(text);
       const password = encryptedImport
         ? (await PasswordPromptModal.open(this.app, {
-          title: PWM_TEXT.unlockManagerTitle,
-          fields: [{ key: 'password', label: PWM_TEXT.currentEncryptionPassword }],
-          confirmText: PWM_TEXT.confirm,
-          cancelText: PWM_TEXT.cancel,
+          title: PWM_TEXT.UNLOCK_MANAGER_TITLE,
+          fields: [{ key: 'password', label: PWM_TEXT.CURRENT_ENCRYPTION_PASSWORD }],
+          confirmText: PWM_TEXT.CONFIRM,
+          cancelText: PWM_TEXT.CANCEL,
         }))?.password?.trim()
         : undefined;
 
@@ -170,7 +170,7 @@ export class PasswordTransferService {
       const imported = await importLibraryFromText(text, password);
       this.context.replaceData(imported);
     } catch {
-      throw new Error(PWM_TEXT.importFailed);
+      throw new Error(PWM_TEXT.IMPORT_FAILED);
     }
   }
 
@@ -178,7 +178,7 @@ export class PasswordTransferService {
     try {
       return importGroupFromText(text, this.context.data);
     } catch {
-      throw new Error(PWM_TEXT.importFailed);
+      throw new Error(PWM_TEXT.IMPORT_FAILED);
     }
   }
 
@@ -186,7 +186,7 @@ export class PasswordTransferService {
     try {
       return importItemFromText(text, this.context.data, groupId);
     } catch {
-      throw new Error(PWM_TEXT.importFailed);
+      throw new Error(PWM_TEXT.IMPORT_FAILED);
     }
   }
 
@@ -194,7 +194,7 @@ export class PasswordTransferService {
     try {
       return importItemsFromText(text, this.context.data, groupId);
     } catch {
-      throw new Error(PWM_TEXT.importFailed);
+      throw new Error(PWM_TEXT.IMPORT_FAILED);
     }
   }
 }

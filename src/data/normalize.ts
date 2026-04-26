@@ -35,7 +35,7 @@ export function normalizePasswordManagerData(saved: unknown): PasswordManagerDat
   const groups = sourceGroups.map(
     (group: Partial<PasswordGroup>, index: number): PasswordGroup => ({
       id: group.id || createId(),
-      name: group.name?.trim() || `${PWM_TEXT.generatedGroupName} ${index + 1}`,
+      name: group.name?.trim() || `${PWM_TEXT.GENERATED_GROUP_NAME} ${index + 1}`,
       createdAt: typeof group.createdAt === 'number' ? group.createdAt : now + index,
       order: typeof group.order === 'number' ? group.order : index,
     }),
@@ -50,7 +50,7 @@ export function normalizePasswordManagerData(saved: unknown): PasswordManagerDat
     (item: Partial<PasswordItem> & { groupId?: string; url?: unknown }, index: number): PasswordItem => ({
       id: item.id || createId(),
       groupIds: normalizeGroupIds(item.groupIds ?? item.groupId, fallbackGroupId, availableGroupIds),
-      title: item.title || PWM_TEXT.generatedNewItemTitle,
+      title: item.title || PWM_TEXT.GENERATED_NEW_ITEM_TITLE,
       username: item.username || '',
       password: item.password || '',
       urls: normalizeUrls(item.urls ?? item.url),
@@ -79,7 +79,7 @@ export function normalizePasswordManagerData(saved: unknown): PasswordManagerDat
             .map((name) => name.trim())
             .filter(Boolean)
           : undefined,
-        title: item.title || PWM_TEXT.generatedNewItemTitle,
+        title: item.title || PWM_TEXT.GENERATED_NEW_ITEM_TITLE,
         username: item.username || '',
         password: item.password || '',
         urls: normalizeUrls(item.urls ?? item.url),

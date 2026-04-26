@@ -89,7 +89,7 @@ export class PasswordPluginContext {
     if (this.pluginConfig.encryptionEnabled) {
       const unlocked = await this.ensureEncryptionWriteAccess();
       if (!unlocked) {
-        throw new Error(PWM_TEXT.encryptionRequiredNotice);
+        throw new Error(PWM_TEXT.ENCRYPTION_REQUIRED_NOTICE);
       }
     }
 
@@ -125,7 +125,7 @@ export class PasswordPluginContext {
     if (this.pluginConfig.encryptionEnabled) {
       const unlocked = await this.ensureEncryptionWriteAccess();
       if (!unlocked) {
-        throw new Error(PWM_TEXT.encryptionRequiredNotice);
+        throw new Error(PWM_TEXT.ENCRYPTION_REQUIRED_NOTICE);
       }
     }
 
@@ -145,10 +145,10 @@ export class PasswordPluginContext {
         reindexOrders(this.data);
         await this.storageStore.createManualBackup(this.pluginConfig, this.data, this.encryptionPassword || undefined);
       }
-      new Notice(PWM_TEXT.backupCreated);
+      new Notice(PWM_TEXT.BACKUP_CREATED);
       return true;
     } catch {
-      new Notice(PWM_TEXT.backupCreateFailed);
+      new Notice(PWM_TEXT.BACKUP_CREATE_FAILED);
       return false;
     }
   }
@@ -391,7 +391,7 @@ export class PasswordPluginContext {
 
     const content = formatPasswordItemForCopy(item, this.data.groups, this.data.settings.copyFormat);
     await navigator.clipboard.writeText(content);
-    new Notice(PWM_TEXT.copiedPasswordInfo);
+    new Notice(PWM_TEXT.COPIED_PASSWORD_INFO);
     return true;
   }
 
@@ -418,7 +418,7 @@ export class PasswordPluginContext {
   removeItemFromGroup(itemId: string, groupId: string) {
     const success = removeItemFromGroup(this.data, itemId, groupId);
     if (!success && this.getItem(itemId)?.groupIds.includes(groupId) && (this.getItem(itemId)?.groupIds.length ?? 0) <= 1) {
-      new Notice(PWM_TEXT.keepOneItemGroup);
+      new Notice(PWM_TEXT.KEEP_ONE_ITEM_GROUP);
     }
     return success;
   }

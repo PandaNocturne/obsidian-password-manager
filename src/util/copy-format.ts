@@ -2,11 +2,11 @@ import { PWM_TEXT } from '../lang';
 import type { PasswordCopyFormat, PasswordGroup, PasswordItem } from './types';
 
 const COPY_FIELD_LABELS = {
-  title: PWM_TEXT.copyFieldTitle,
-  username: PWM_TEXT.copyFieldUsername,
-  password: PWM_TEXT.copyFieldPassword,
-  url: PWM_TEXT.copyFieldUrl,
-  notes: PWM_TEXT.copyFieldNotes,
+  title: PWM_TEXT.COPY_FIELD_TITLE,
+  username: PWM_TEXT.COPY_FIELD_USERNAME,
+  password: PWM_TEXT.COPY_FIELD_PASSWORD,
+  url: PWM_TEXT.COPY_FIELD_URL,
+  notes: PWM_TEXT.COPY_FIELD_NOTES,
 } as const;
 
 type ParsedCopyItem = {

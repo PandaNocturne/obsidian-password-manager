@@ -74,7 +74,7 @@ export class PasswordPromptModal extends Modal {
             const actions = inputContainer.createDiv({ cls: 'pwm-inline-actions pwm-floating-actions' });
             const toggleButton = actions.createEl('button', {
               cls: 'clickable-icon pwm-icon-button',
-              attr: { type: 'button', 'aria-label': PWM_TEXT.showPassword },
+              attr: { type: 'button', 'aria-label': PWM_TEXT.SHOW_PASSWORD },
             });
             removeFromTabOrder(toggleButton);
             setIcon(toggleButton, 'eye');
@@ -83,7 +83,7 @@ export class PasswordPromptModal extends Modal {
               const isHidden = text.inputEl.type === 'password';
               text.inputEl.type = isHidden ? 'text' : 'password';
               setIcon(toggleButton, isHidden ? 'eye-off' : 'eye');
-              toggleButton.setAttr('aria-label', isHidden ? PWM_TEXT.hidePassword : PWM_TEXT.showPassword);
+              toggleButton.setAttr('aria-label', isHidden ? PWM_TEXT.HIDE_PASSWORD : PWM_TEXT.SHOW_PASSWORD);
             });
           }
 

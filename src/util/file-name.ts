@@ -42,7 +42,7 @@ const WINDOWS_RESERVED_FILE_NAMES = new Set([
 export function validateFileSafeName(value: string) {
   const trimmedValue = value.trim();
   if (!trimmedValue) {
-    return PWM_TEXT.fileNameEmpty;
+    return PWM_TEXT.FILE_NAME_EMPTY;
   }
 
   const hasInvalidCharacter = [...trimmedValue].some((char) => {
@@ -50,17 +50,17 @@ export function validateFileSafeName(value: string) {
     return INVALID_FILE_NAME_CHARACTERS.has(char) || codePoint <= 0x1F;
   });
   if (hasInvalidCharacter) {
-    return PWM_TEXT.fileNameInvalidChars;
+    return PWM_TEXT.FILE_NAME_INVALID_CHARS;
   }
 
   if (TRAILING_FILE_NAME_CHARACTERS_REGEX.test(trimmedValue)) {
-    return PWM_TEXT.fileNameTrailingChars;
+    return PWM_TEXT.FILE_NAME_TRAILING_CHARS;
   }
 
   const extensionIndex = trimmedValue.indexOf('.');
   const baseName = (extensionIndex >= 0 ? trimmedValue.slice(0, extensionIndex) : trimmedValue).trim().toUpperCase();
   if (WINDOWS_RESERVED_FILE_NAMES.has(baseName)) {
-    return PWM_TEXT.fileNameWindowsReserved;
+    return PWM_TEXT.FILE_NAME_WINDOWS_RESERVED;
   }
 
   return null;

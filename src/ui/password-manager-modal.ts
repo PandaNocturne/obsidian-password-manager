@@ -12,33 +12,33 @@ function setCssProps(element: HTMLElement, styles: Record<string, string>) {
 }
 
 const GROUP_SORT_OPTIONS: Array<{ value: PwmSortMode; label: string }> = [
-  { value: 'custom', label: PWM_TEXT.sortCustom },
-  { value: 'name-asc', label: PWM_TEXT.sortByNameAsc },
-  { value: 'name-desc', label: PWM_TEXT.sortByNameDesc },
-  { value: 'created-asc', label: PWM_TEXT.sortByCreatedAsc },
-  { value: 'created-desc', label: PWM_TEXT.sortByCreatedDesc },
-  { value: 'item-count-asc', label: PWM_TEXT.sortByItemCountAsc },
-  { value: 'item-count-desc', label: PWM_TEXT.sortByItemCountDesc },
+  { value: 'custom', label: PWM_TEXT.SORT_CUSTOM },
+  { value: 'name-asc', label: PWM_TEXT.SORT_BY_NAME_ASC },
+  { value: 'name-desc', label: PWM_TEXT.SORT_BY_NAME_DESC },
+  { value: 'created-asc', label: PWM_TEXT.SORT_BY_CREATED_ASC },
+  { value: 'created-desc', label: PWM_TEXT.SORT_BY_CREATED_DESC },
+  { value: 'item-count-asc', label: PWM_TEXT.SORT_BY_ITEM_COUNT_ASC },
+  { value: 'item-count-desc', label: PWM_TEXT.SORT_BY_ITEM_COUNT_DESC },
 ];
 
 const ITEM_SORT_OPTIONS: Array<{ value: PwmSortMode; label: string }> = [
-  { value: 'custom', label: PWM_TEXT.sortCustom },
-  { value: 'name-asc', label: PWM_TEXT.sortByNameAsc },
-  { value: 'name-desc', label: PWM_TEXT.sortByNameDesc },
-  { value: 'created-asc', label: PWM_TEXT.sortByCreatedAsc },
-  { value: 'created-desc', label: PWM_TEXT.sortByCreatedDesc },
-  { value: 'updated-asc', label: PWM_TEXT.sortByUpdatedAsc },
-  { value: 'updated-desc', label: PWM_TEXT.sortByUpdatedDesc },
+  { value: 'custom', label: PWM_TEXT.SORT_CUSTOM },
+  { value: 'name-asc', label: PWM_TEXT.SORT_BY_NAME_ASC },
+  { value: 'name-desc', label: PWM_TEXT.SORT_BY_NAME_DESC },
+  { value: 'created-asc', label: PWM_TEXT.SORT_BY_CREATED_ASC },
+  { value: 'created-desc', label: PWM_TEXT.SORT_BY_CREATED_DESC },
+  { value: 'updated-asc', label: PWM_TEXT.SORT_BY_UPDATED_ASC },
+  { value: 'updated-desc', label: PWM_TEXT.SORT_BY_UPDATED_DESC },
 ];
 
 const TRASH_ITEM_SORT_OPTIONS: Array<{ value: PwmSortMode; label: string }> = [
-  { value: 'custom', label: PWM_TEXT.sortCustom },
-  { value: 'name-asc', label: PWM_TEXT.sortByNameAsc },
-  { value: 'name-desc', label: PWM_TEXT.sortByNameDesc },
-  { value: 'created-asc', label: PWM_TEXT.sortByCreatedAsc },
-  { value: 'created-desc', label: PWM_TEXT.sortByCreatedDesc },
-  { value: 'deleted-asc', label: PWM_TEXT.sortByDeletedAsc },
-  { value: 'deleted-desc', label: PWM_TEXT.sortByDeletedDesc },
+  { value: 'custom', label: PWM_TEXT.SORT_CUSTOM },
+  { value: 'name-asc', label: PWM_TEXT.SORT_BY_NAME_ASC },
+  { value: 'name-desc', label: PWM_TEXT.SORT_BY_NAME_DESC },
+  { value: 'created-asc', label: PWM_TEXT.SORT_BY_CREATED_ASC },
+  { value: 'created-desc', label: PWM_TEXT.SORT_BY_CREATED_DESC },
+  { value: 'deleted-asc', label: PWM_TEXT.SORT_BY_DELETED_ASC },
+  { value: 'deleted-desc', label: PWM_TEXT.SORT_BY_DELETED_DESC },
 ];
 
 const SORT_MENU_ICON = 'arrow-up-down';
@@ -106,7 +106,7 @@ export class PasswordManagerModal extends Modal {
 
   onOpen() {
     this.plugin.registerManagerModal(this);
-    this.titleEl.setText(PWM_TEXT.modalTitle);
+    this.titleEl.setText(PWM_TEXT.MODAL_TITLE);
     this.modalEl.addClass('pwm-modal');
     this.applyModalSize();
     this.contentEl.tabIndex = -1;
@@ -458,13 +458,13 @@ export class PasswordManagerModal extends Modal {
     }
 
     this.searchActionsEl = titleContainer.createDiv({ cls: 'pwm-modal-header-actions' });
-    this.plugin.createIconButton(this.searchActionsEl, 'database-backup', PWM_TEXT.createBackupNow, async () => {
+    this.plugin.createIconButton(this.searchActionsEl, 'database-backup', PWM_TEXT.CREATE_BACKUP_NOW, async () => {
       await this.plugin.createBackupNow();
     });
-    this.plugin.createIconButton(this.searchActionsEl, 'upload', PWM_TEXT.exportLibrary, async () => {
+    this.plugin.createIconButton(this.searchActionsEl, 'upload', PWM_TEXT.EXPORT_LIBRARY, async () => {
       await this.plugin.exportLibrary();
     });
-    this.plugin.createIconButton(this.searchActionsEl, 'download', PWM_TEXT.importLibrary, async () => {
+    this.plugin.createIconButton(this.searchActionsEl, 'download', PWM_TEXT.IMPORT_LIBRARY, async () => {
       await this.handleImport(async (text) => {
         await this.plugin.importLibraryFromText(text);
         this.reconcileSelectionState();
@@ -480,7 +480,7 @@ export class PasswordManagerModal extends Modal {
     this.searchInputEl = searchField.createEl('input', {
       type: 'text',
       value: this.keyword,
-      placeholder: PWM_TEXT.searchPlaceholder,
+      placeholder: PWM_TEXT.SEARCH_PLACEHOLDER,
       cls: 'pwm-search pwm-modal-header-search',
     });
     this.searchInputEl.addEventListener('click', (event) => event.stopPropagation());
@@ -493,7 +493,7 @@ export class PasswordManagerModal extends Modal {
       this.reconcileSelectionState();
       this.render();
     });
-    this.searchClearButtonEl = this.plugin.createIconButton(searchField, 'x', PWM_TEXT.clearSearch, async () => {
+    this.searchClearButtonEl = this.plugin.createIconButton(searchField, 'x', PWM_TEXT.CLEAR_SEARCH, async () => {
       if (!this.searchInputEl) {
         return;
       }
@@ -557,11 +557,11 @@ export class PasswordManagerModal extends Modal {
 
     const header = container.createDiv({ cls: 'pwm-header' });
     const title = header.createDiv({ cls: 'pwm-inline-actions' });
-    title.createEl('h3', { text: PWM_TEXT.groups });
+    title.createEl('h3', { text: PWM_TEXT.GROUPS });
 
     const actions = header.createDiv({ cls: 'pwm-actions' });
     if (!this.isTrashMode()) {
-      this.plugin.createIconButton(actions, 'plus', PWM_TEXT.addGroup, async () => {
+      this.plugin.createIconButton(actions, 'plus', PWM_TEXT.ADD_GROUP, async () => {
         const allowed = await this.ensureWriteAccess();
         if (!allowed) {
           return;
@@ -576,13 +576,13 @@ export class PasswordManagerModal extends Modal {
         this.render();
       });
     }
-    this.createSortMenuButton(actions, this.plugin.data.view.groupSort, PWM_TEXT.sortGroups, GROUP_SORT_OPTIONS, async (value) => {
+    this.createSortMenuButton(actions, this.plugin.data.view.groupSort, PWM_TEXT.SORT_GROUPS, GROUP_SORT_OPTIONS, async (value) => {
       this.plugin.setGroupSort(value);
       await this.plugin.savePluginData();
       this.reconcileSelectionState();
       this.render();
     });
-    const deleteGroupButton = this.plugin.createIconButton(actions, 'trash', PWM_TEXT.deleteGroup, async () => {
+    const deleteGroupButton = this.plugin.createIconButton(actions, 'trash', PWM_TEXT.DELETE_GROUP, async () => {
       await this.deleteSelectedGroups();
     });
     if (this.isTrashMode()) {
@@ -726,7 +726,7 @@ export class PasswordManagerModal extends Modal {
       } else {
         const name = meta.createDiv({ text: group.name, cls: 'pwm-group-name' });
         if (!this.isTrashMode()) {
-          name.setAttr('title', PWM_TEXT.editGroupName);
+          name.setAttr('title', PWM_TEXT.EDIT_GROUP_NAME);
           name.addEventListener('dblclick', (event) => {
             event.stopPropagation();
             this.editingGroupId = group.id;
@@ -748,7 +748,7 @@ export class PasswordManagerModal extends Modal {
     }
 
     const footer = container.createDiv({ cls: 'pwm-footer-actions' });
-    this.plugin.createIconButton(footer, 'folder-down', PWM_TEXT.importGroup, async () => {
+    this.plugin.createIconButton(footer, 'folder-down', PWM_TEXT.IMPORT_GROUP, async () => {
       await this.handleImport(async (text) => {
         const group = await this.plugin.importGroupFromText(text);
         this.selectedGroupId = group.id;
@@ -757,7 +757,7 @@ export class PasswordManagerModal extends Modal {
         this.resetItemSelection(this.selectedItemId);
       }, 'application/json,text/markdown,text/plain,text/csv,.json,.md,.markdown,.txt,.csv');
     });
-    const exportGroupButton = this.plugin.createIconButton(footer, 'folder-up', PWM_TEXT.exportGroup, async () => { });
+    const exportGroupButton = this.plugin.createIconButton(footer, 'folder-up', PWM_TEXT.EXPORT_GROUP, async () => { });
     exportGroupButton.addEventListener('click', (event) => {
       event.preventDefault();
       event.stopPropagation();
@@ -769,19 +769,19 @@ export class PasswordManagerModal extends Modal {
 
       const menu = new Menu();
       menu.addItem((item) => {
-        item.setTitle(PWM_TEXT.exportFormatJson);
+        item.setTitle(PWM_TEXT.EXPORT_FORMAT_JSON);
         item.onClick(() => {
           void this.plugin.exportGroups(groupIds, 'json');
         });
       });
       menu.addItem((item) => {
-        item.setTitle(PWM_TEXT.exportFormatMarkdown);
+        item.setTitle(PWM_TEXT.EXPORT_FORMAT_MARKDOWN);
         item.onClick(() => {
           void this.plugin.exportGroups(groupIds, 'markdown');
         });
       });
       menu.addItem((item) => {
-        item.setTitle(PWM_TEXT.exportFormatCsv);
+        item.setTitle(PWM_TEXT.EXPORT_FORMAT_CSV);
         item.onClick(() => {
           void this.plugin.exportGroups(groupIds, 'csv');
         });
@@ -794,13 +794,13 @@ export class PasswordManagerModal extends Modal {
     container.empty();
 
     const header = container.createDiv({ cls: 'pwm-header' });
-    header.createEl('h3', { text: PWM_TEXT.items });
+    header.createEl('h3', { text: PWM_TEXT.ITEMS });
 
     const actions = header.createDiv({ cls: 'pwm-actions' });
     if (!this.isTrashMode()) {
-      this.plugin.createIconButton(actions, 'plus', PWM_TEXT.addItem, async () => {
+      this.plugin.createIconButton(actions, 'plus', PWM_TEXT.ADD_ITEM, async () => {
         if (!this.selectedGroupId) {
-          new Notice(PWM_TEXT.selectGroupFirst);
+          new Notice(PWM_TEXT.SELECT_GROUP_FIRST);
           return;
         }
         const allowed = await this.ensureWriteAccess();
@@ -815,7 +815,7 @@ export class PasswordManagerModal extends Modal {
       });
     }
     const itemSortOptions = this.isTrashMode() ? TRASH_ITEM_SORT_OPTIONS : ITEM_SORT_OPTIONS;
-    this.createSortMenuButton(actions, this.plugin.data.view.itemSort, PWM_TEXT.sortItems, itemSortOptions, async (value) => {
+    this.createSortMenuButton(actions, this.plugin.data.view.itemSort, PWM_TEXT.SORT_ITEMS, itemSortOptions, async (value) => {
       this.plugin.setItemSort(value);
       await this.plugin.savePluginData();
       this.reconcileSelectionState();
@@ -823,12 +823,12 @@ export class PasswordManagerModal extends Modal {
     });
     this.createDisplayMenuButton(actions);
     if (this.isTrashMode()) {
-      const restoreButton = this.plugin.createIconButton(actions, 'rotate-ccw', PWM_TEXT.restoreItem, async () => {
+      const restoreButton = this.plugin.createIconButton(actions, 'rotate-ccw', PWM_TEXT.RESTORE_ITEM, async () => {
         await this.restoreSelectedItems();
       });
       restoreButton.addClass('pwm-button-success');
     }
-    const deleteItemButton = this.plugin.createIconButton(actions, 'trash', PWM_TEXT.deleteItem, async () => {
+    const deleteItemButton = this.plugin.createIconButton(actions, 'trash', PWM_TEXT.DELETE_ITEM, async () => {
       await this.deleteSelectedItems();
     });
     if (this.isTrashMode()) {
@@ -840,9 +840,9 @@ export class PasswordManagerModal extends Modal {
     const items = this.getVisibleItems(this.selectedGroupId);
 
     if (!this.selectedGroupId) {
-      list.createDiv({ text: this.keyword ? PWM_TEXT.noSearchResults : PWM_TEXT.selectGroupFirst, cls: 'pwm-empty' });
+      list.createDiv({ text: this.keyword ? PWM_TEXT.NO_SEARCH_RESULTS : PWM_TEXT.SELECT_GROUP_FIRST, cls: 'pwm-empty' });
     } else if (!items.length) {
-      list.createDiv({ text: this.keyword ? PWM_TEXT.noSearchResults : PWM_TEXT.noItemsInGroup, cls: 'pwm-empty' });
+      list.createDiv({ text: this.keyword ? PWM_TEXT.NO_SEARCH_RESULTS : PWM_TEXT.NO_ITEMS_IN_GROUP, cls: 'pwm-empty' });
     } else {
       items.forEach((item, index) => {
         const row = list.createDiv({ cls: 'pwm-list-item pwm-item-row pwm-draggable-row' });
@@ -911,7 +911,7 @@ export class PasswordManagerModal extends Modal {
 
         if (!this.isTrashMode()) {
           const pinActions = row.createDiv({ cls: 'pwm-item-row-actions pwm-item-row-actions-top' });
-          this.plugin.createIconButton(pinActions, 'pin', item.pinned ? PWM_TEXT.unpinItem : PWM_TEXT.pinItem, async () => {
+          this.plugin.createIconButton(pinActions, 'pin', item.pinned ? PWM_TEXT.UNPIN_ITEM : PWM_TEXT.PIN_ITEM, async () => {
             const allowed = await this.ensureWriteAccess();
             if (!allowed) {
               return;
@@ -924,12 +924,12 @@ export class PasswordManagerModal extends Modal {
 
         const body = row.createDiv({ cls: 'pwm-item-body' });
         const meta = body.createDiv({ cls: 'pwm-item-meta' });
-        meta.createDiv({ text: item.title || PWM_TEXT.untitledItem, cls: 'pwm-item-title' });
+        meta.createDiv({ text: item.title || PWM_TEXT.UNTITLED_ITEM, cls: 'pwm-item-title' });
         this.renderItemMeta(meta, item);
 
         if (!this.isTrashMode()) {
           const rowActions = row.createDiv({ cls: 'pwm-item-row-actions pwm-item-row-actions-bottom' });
-          this.plugin.createIconButton(rowActions, 'copy-plus', PWM_TEXT.copyItem, async () => {
+          this.plugin.createIconButton(rowActions, 'copy-plus', PWM_TEXT.COPY_ITEM, async () => {
             const allowed = await this.ensureWriteAccess();
             if (!allowed) {
               return;
@@ -941,7 +941,7 @@ export class PasswordManagerModal extends Modal {
             this.selectedItemId = copiedItem.id;
             this.resetItemSelection(copiedItem.id);
             await this.plugin.savePluginData();
-            new Notice(PWM_TEXT.copiedItem);
+            new Notice(PWM_TEXT.COPIED_ITEM);
             this.render();
           });
         }
@@ -957,7 +957,7 @@ export class PasswordManagerModal extends Modal {
     }
 
     const footer = container.createDiv({ cls: 'pwm-footer-actions' });
-    this.plugin.createIconButton(footer, 'file-down', PWM_TEXT.importItems, async () => {
+    this.plugin.createIconButton(footer, 'file-down', PWM_TEXT.IMPORT_ITEMS, async () => {
       await this.handleImport(async (text) => {
         const targetGroupId = this.isTrashMode()
           ? (this.plugin.data.groups[0]?.id ?? '')
@@ -976,7 +976,7 @@ export class PasswordManagerModal extends Modal {
         }
       }, 'application/json,text/markdown,text/plain,.json,.md,.markdown,.txt');
     });
-    const exportSelectedItemsButton = this.plugin.createIconButton(footer, 'file-up', PWM_TEXT.exportSelectedItems, async () => { });
+    const exportSelectedItemsButton = this.plugin.createIconButton(footer, 'file-up', PWM_TEXT.EXPORT_SELECTED_ITEMS, async () => { });
     exportSelectedItemsButton.addEventListener('click', (event) => {
       event.preventDefault();
       event.stopPropagation();
@@ -988,13 +988,13 @@ export class PasswordManagerModal extends Modal {
 
       const menu = new Menu();
       menu.addItem((item) => {
-        item.setTitle(PWM_TEXT.exportFormatJson);
+        item.setTitle(PWM_TEXT.EXPORT_FORMAT_JSON);
         item.onClick(() => {
           void this.plugin.exportItems(itemIds, 'json');
         });
       });
       menu.addItem((item) => {
-        item.setTitle(PWM_TEXT.exportFormatMarkdown);
+        item.setTitle(PWM_TEXT.EXPORT_FORMAT_MARKDOWN);
         item.onClick(() => {
           void this.plugin.exportItems(itemIds, 'markdown');
         });
@@ -1007,24 +1007,24 @@ export class PasswordManagerModal extends Modal {
     container.empty();
 
     const header = container.createDiv({ cls: 'pwm-header' });
-    header.createEl('h3', { text: PWM_TEXT.details });
+    header.createEl('h3', { text: PWM_TEXT.DETAILS });
     const actions = header.createDiv({ cls: 'pwm-actions' });
     if (!this.isTrashMode()) {
-      this.plugin.createIconButton(actions, 'clipboard-paste', PWM_TEXT.pasteIntoFocusedField, async () => {
+      this.plugin.createIconButton(actions, 'clipboard-paste', PWM_TEXT.PASTE_INTO_FOCUSED_FIELD, async () => {
         await this.pasteIntoFocusedField();
       });
     }
-    this.plugin.createIconButton(actions, 'copy', PWM_TEXT.copyPasswordInfo, async () => {
+    this.plugin.createIconButton(actions, 'copy', PWM_TEXT.COPY_PASSWORD_INFO, async () => {
       if (!this.selectedItemId) {
         return;
       }
       await this.plugin.copyItemAsConfiguredFormat(this.selectedItemId);
     });
-    this.plugin.createIconButton(actions, 'trash', PWM_TEXT.deleteItemFromDetails, async () => {
+    this.plugin.createIconButton(actions, 'trash', PWM_TEXT.DELETE_ITEM_FROM_DETAILS, async () => {
       await this.deleteSelectedItems();
     });
     if (!this.isTrashMode()) {
-      this.plugin.createIconButton(actions, 'save', PWM_TEXT.savePasswordInfo, async () => {
+      this.plugin.createIconButton(actions, 'save', PWM_TEXT.SAVE_PASSWORD_INFO, async () => {
         await this.saveSelectedItemDetails();
       });
     }
@@ -1037,7 +1037,7 @@ export class PasswordManagerModal extends Modal {
       this.detailsDraftItemId = '';
       this.detailInputs = {};
       this.focusedDetailInput = null;
-      detail.createDiv({ text: PWM_TEXT.noItem, cls: 'pwm-empty' });
+      detail.createDiv({ text: PWM_TEXT.NO_ITEM, cls: 'pwm-empty' });
       this.renderDetailsBottomToolbar(body);
       return;
     }
@@ -1046,7 +1046,7 @@ export class PasswordManagerModal extends Modal {
     this.detailInputs = {};
     this.detailUrlInputs = [];
 
-    const titleInput = this.createTextField(detail, PWM_TEXT.title, this.detailsDraft.title, [], { leadingIcon: 'text-cursor-input' });
+    const titleInput = this.createTextField(detail, PWM_TEXT.TITLE, this.detailsDraft.title, [], { leadingIcon: 'text-cursor-input' });
     titleInput.disabled = this.isTrashMode();
     this.detailInputs.title = titleInput;
     titleInput.addEventListener('input', () => {
@@ -1055,15 +1055,15 @@ export class PasswordManagerModal extends Modal {
 
     const usernameInput = this.createTextField(
       detail,
-      PWM_TEXT.username,
+      PWM_TEXT.USERNAME,
       this.detailsDraft.username,
       [
         {
           icon: 'copy',
-          label: PWM_TEXT.copyUsername,
+          label: PWM_TEXT.COPY_USERNAME,
           onClick: async (input) => {
             await navigator.clipboard.writeText(input.value);
-            new Notice(PWM_TEXT.copiedUsername);
+            new Notice(PWM_TEXT.COPIED_USERNAME);
           },
         },
       ],
@@ -1086,15 +1086,15 @@ export class PasswordManagerModal extends Modal {
 
     const notesTextarea = this.createTextareaField(
       detail,
-      PWM_TEXT.notes,
+      PWM_TEXT.NOTES,
       this.detailsDraft.notes,
       [
         {
           icon: 'copy',
-          label: PWM_TEXT.copyNotes,
+          label: PWM_TEXT.COPY_NOTES,
           onClick: async (textarea) => {
             await navigator.clipboard.writeText(textarea.value);
-            new Notice(PWM_TEXT.copiedNotes);
+            new Notice(PWM_TEXT.COPIED_NOTES);
           },
         },
       ],
@@ -1112,10 +1112,10 @@ export class PasswordManagerModal extends Modal {
   private renderUrlFields(container: HTMLElement) {
     const field = container.createDiv({ cls: 'pwm-field' });
     const header = field.createDiv({ cls: 'pwm-field-header' });
-    header.createEl('label', { text: PWM_TEXT.url });
+    header.createEl('label', { text: PWM_TEXT.URL });
 
     if (!this.isTrashMode()) {
-      this.plugin.createIconButton(header, 'plus', PWM_TEXT.addLink, () => {
+      this.plugin.createIconButton(header, 'plus', PWM_TEXT.ADD_LINK, () => {
         this.detailsDraft.urls = [...this.getNormalizedDraftUrls(), ''];
         this.render();
       });
@@ -1130,7 +1130,7 @@ export class PasswordManagerModal extends Modal {
     });
 
     if (!urls.some((value) => value.trim())) {
-      list.createDiv({ cls: 'pwm-url-empty', text: PWM_TEXT.emptyLinks });
+      list.createDiv({ cls: 'pwm-url-empty', text: PWM_TEXT.EMPTY_LINKS });
     }
   }
 
@@ -1149,20 +1149,20 @@ export class PasswordManagerModal extends Modal {
     });
 
     const actions = row.createDiv({ cls: 'pwm-inline-actions pwm-floating-actions' });
-    this.plugin.createIconButton(actions, 'external-link', PWM_TEXT.openUrl, async () => {
+    this.plugin.createIconButton(actions, 'external-link', PWM_TEXT.OPEN_URL, async () => {
       if (!input.value.trim()) {
-        new Notice(PWM_TEXT.noOpenUrl);
+        new Notice(PWM_TEXT.NO_OPEN_URL);
         return;
       }
       window.open(input.value, '_blank');
     });
-    this.plugin.createIconButton(actions, 'copy', PWM_TEXT.copyUrl, async () => {
+    this.plugin.createIconButton(actions, 'copy', PWM_TEXT.COPY_URL, async () => {
       await navigator.clipboard.writeText(input.value);
-      new Notice(PWM_TEXT.copiedUrl);
+      new Notice(PWM_TEXT.COPIED_URL);
     });
 
     if (!this.isTrashMode()) {
-      this.plugin.createIconButton(actions, 'trash', PWM_TEXT.removeLink, async () => {
+      this.plugin.createIconButton(actions, 'trash', PWM_TEXT.REMOVE_LINK, async () => {
         const nextUrls = this.detailsDraft.urls.filter((_, currentIndex) => currentIndex !== index);
         this.detailsDraft.urls = nextUrls.length ? nextUrls : [''];
         this.render();
@@ -1179,10 +1179,10 @@ export class PasswordManagerModal extends Modal {
   private renderTagsFooter(container: HTMLElement, item: PasswordItem) {
     const footer = container.createDiv({ cls: 'pwm-footer-actions pwm-tags-footer' });
     const header = footer.createDiv({ cls: 'pwm-tags-header' });
-    header.createDiv({ cls: 'pwm-tags-label', text: PWM_TEXT.tags });
+    header.createDiv({ cls: 'pwm-tags-label', text: PWM_TEXT.TAGS });
 
     if (!this.isTrashMode()) {
-      const addTagButton = this.plugin.createIconButton(header, 'plus', PWM_TEXT.addTag, () => undefined);
+      const addTagButton = this.plugin.createIconButton(header, 'plus', PWM_TEXT.ADD_TAG, () => undefined);
       addTagButton.addEventListener('click', (event) => {
         event.preventDefault();
         event.stopPropagation();
@@ -1227,7 +1227,7 @@ export class PasswordManagerModal extends Modal {
 
         const removeButton = tagEl.createEl('button', {
           cls: 'pwm-tag-remove',
-          attr: { type: 'button', 'aria-label': `${PWM_TEXT.removeTag}: ${group.name}` },
+          attr: { type: 'button', 'aria-label': `${PWM_TEXT.REMOVE_TAG}: ${group.name}` },
           text: '×',
         });
         removeButton.addEventListener('click', (event) => {
@@ -1244,7 +1244,7 @@ export class PasswordManagerModal extends Modal {
         });
       });
     } else {
-      tags.createDiv({ cls: 'pwm-empty pwm-tags-empty', text: PWM_TEXT.noTags });
+      tags.createDiv({ cls: 'pwm-empty pwm-tags-empty', text: PWM_TEXT.NO_TAGS });
     }
   }
 
@@ -1255,7 +1255,7 @@ export class PasswordManagerModal extends Modal {
     const ratioLockButton = this.plugin.createIconButton(
       footer,
       this.plugin.pluginConfig.columnRatioLocked ? 'lock' : 'unlock',
-      this.plugin.pluginConfig.columnRatioLocked ? PWM_TEXT.columnRatioUnlock : PWM_TEXT.columnRatioLock,
+      this.plugin.pluginConfig.columnRatioLocked ? PWM_TEXT.COLUMN_RATIO_UNLOCK : PWM_TEXT.COLUMN_RATIO_LOCK,
       async () => {
         this.plugin.updatePluginConfig({ columnRatioLocked: !this.plugin.pluginConfig.columnRatioLocked });
         await this.plugin.savePluginConfig();
@@ -1270,13 +1270,13 @@ export class PasswordManagerModal extends Modal {
     const modeToggleButton = this.plugin.createIconButton(
       footer,
       this.isTrashMode() ? 'arrow-left' : 'trash-2',
-      this.isTrashMode() ? PWM_TEXT.switchManager : PWM_TEXT.openTrash,
+      this.isTrashMode() ? PWM_TEXT.SWITCH_MANAGER : PWM_TEXT.OPEN_TRASH,
       async () => {
         this.toggleMode();
       },
     );
     modeToggleButton.addClass(this.isTrashMode() ? 'pwm-button-success' : 'pwm-button-warning');
-    this.plugin.createIconButton(footer, 'settings', PWM_TEXT.openPluginSettings, () => {
+    this.plugin.createIconButton(footer, 'settings', PWM_TEXT.OPEN_PLUGIN_SETTINGS, () => {
       this.plugin.openSettings();
     });
   }
@@ -1284,19 +1284,19 @@ export class PasswordManagerModal extends Modal {
   private renderItemMeta(container: HTMLElement, item: PasswordItem) {
     const primaryUrl = item.urls[0] ?? '';
     if (this.plugin.data.settings.showItemUsername) {
-      container.createDiv({ text: `${PWM_TEXT.username}：${item.username}`, cls: 'pwm-item-subtitle' });
+      container.createDiv({ text: `${PWM_TEXT.USERNAME}：${item.username}`, cls: 'pwm-item-subtitle' });
     }
     if (this.plugin.data.settings.showItemUrl) {
-      container.createDiv({ text: `${PWM_TEXT.url}：${primaryUrl}`, cls: 'pwm-item-subtitle' });
+      container.createDiv({ text: `${PWM_TEXT.URL}：${primaryUrl}`, cls: 'pwm-item-subtitle' });
     }
     if (this.plugin.data.settings.showItemNotes) {
-      container.createDiv({ text: `${PWM_TEXT.notes}：${item.notes}`, cls: 'pwm-item-subtitle' });
+      container.createDiv({ text: `${PWM_TEXT.NOTES}：${item.notes}`, cls: 'pwm-item-subtitle' });
     }
     if (this.plugin.data.settings.showItemGroupTags) {
       const groups = this.getItemGroups(item);
       if (groups.length) {
         const tagRow = container.createDiv({ cls: 'pwm-item-subtitle pwm-item-tags-row' });
-        tagRow.createSpan({ text: `${PWM_TEXT.tags}：` });
+        tagRow.createSpan({ text: `${PWM_TEXT.TAGS}：` });
         const tagList = tagRow.createDiv({ cls: 'pwm-item-tags' });
         groups.forEach((group) => {
           const tag = tagList.createEl('a', { cls: 'tag pwm-item-group-tag', href: '#' });
@@ -1344,7 +1344,7 @@ export class PasswordManagerModal extends Modal {
 
   private createPasswordField(container: HTMLElement, value: string) {
     const field = container.createDiv({ cls: 'pwm-field' });
-    field.createEl('label', { text: PWM_TEXT.password });
+    field.createEl('label', { text: PWM_TEXT.PASSWORD });
 
     const row = field.createDiv({ cls: 'pwm-input-row has-leading-icon has-floating-actions' });
     const prefix = row.createDiv({ cls: 'pwm-input-prefix' });
@@ -1354,15 +1354,15 @@ export class PasswordManagerModal extends Modal {
     this.bindDetailFocus(input);
 
     const actions = row.createDiv({ cls: 'pwm-inline-actions pwm-floating-actions' });
-    const toggleButton = this.plugin.createIconButton(actions, 'eye', PWM_TEXT.showPassword, () => {
+    const toggleButton = this.plugin.createIconButton(actions, 'eye', PWM_TEXT.SHOW_PASSWORD, () => {
       const isHidden = input.type === 'password';
       input.type = isHidden ? 'text' : 'password';
       setIcon(toggleButton, isHidden ? 'eye-off' : 'eye');
-      toggleButton.setAttr('aria-label', isHidden ? PWM_TEXT.hidePassword : PWM_TEXT.showPassword);
+      toggleButton.setAttr('aria-label', isHidden ? PWM_TEXT.HIDE_PASSWORD : PWM_TEXT.SHOW_PASSWORD);
     });
-    this.plugin.createIconButton(actions, 'copy', PWM_TEXT.copyPassword, async () => {
+    this.plugin.createIconButton(actions, 'copy', PWM_TEXT.COPY_PASSWORD, async () => {
       await navigator.clipboard.writeText(input.value);
-      new Notice(PWM_TEXT.copiedPassword);
+      new Notice(PWM_TEXT.COPIED_PASSWORD);
     });
 
     return input;
@@ -1522,7 +1522,7 @@ export class PasswordManagerModal extends Modal {
       });
       await this.plugin.savePluginData();
       if (!options?.silent) {
-        new Notice(PWM_TEXT.savedPasswordInfo);
+        new Notice(PWM_TEXT.SAVED_PASSWORD_INFO);
       }
       this.render();
       return true;
@@ -1538,7 +1538,7 @@ export class PasswordManagerModal extends Modal {
 
     const input = this.focusedDetailInput;
     if (!input) {
-      new Notice(PWM_TEXT.focusFieldToPaste);
+      new Notice(PWM_TEXT.FOCUS_FIELD_TO_PASTE);
       return;
     }
 
@@ -1621,7 +1621,7 @@ export class PasswordManagerModal extends Modal {
   }
 
   private createDisplayMenuButton(container: HTMLElement) {
-    const button = this.plugin.createIconButton(container, 'info', PWM_TEXT.itemDisplaySetting, async () => { });
+    const button = this.plugin.createIconButton(container, 'info', PWM_TEXT.ITEM_DISPLAY_SETTING, async () => { });
     button.addEventListener('click', (event) => {
       event.preventDefault();
       event.stopPropagation();
@@ -1629,10 +1629,10 @@ export class PasswordManagerModal extends Modal {
       const menu = new Menu();
       const settings = this.plugin.data.settings;
       const actions: Array<{ key: 'showItemUsername' | 'showItemUrl' | 'showItemGroupTags' | 'showItemNotes'; title: string }> = [
-        { key: 'showItemUsername', title: PWM_TEXT.itemDisplayUsername },
-        { key: 'showItemUrl', title: PWM_TEXT.itemDisplayUrl },
-        { key: 'showItemGroupTags', title: PWM_TEXT.itemDisplayGroupTags },
-        { key: 'showItemNotes', title: PWM_TEXT.itemDisplayNotes },
+        { key: 'showItemUsername', title: PWM_TEXT.ITEM_DISPLAY_USERNAME },
+        { key: 'showItemUrl', title: PWM_TEXT.ITEM_DISPLAY_URL },
+        { key: 'showItemGroupTags', title: PWM_TEXT.ITEM_DISPLAY_GROUP_TAGS },
+        { key: 'showItemNotes', title: PWM_TEXT.ITEM_DISPLAY_NOTES },
       ];
 
       actions.forEach(({ key, title }) => {
@@ -1809,9 +1809,9 @@ export class PasswordManagerModal extends Modal {
 
     const deletedItemCount = this.getDeletedItemCountForGroups(groupIds);
     const deleteMessage = this.isTrashMode()
-      ? formatPWMText(PWM_TEXT.deleteGroupPermanentMessage, { count: deletedItemCount })
-      : formatPWMText(PWM_TEXT.deleteGroupTrashMessage, { count: deletedItemCount });
-    if (!(await this.confirmDelete(PWM_TEXT.confirmDeleteGroupTitle, deleteMessage))) {
+      ? formatPWMText(PWM_TEXT.DELETE_GROUP_PERMANENT_MESSAGE, { count: deletedItemCount })
+      : formatPWMText(PWM_TEXT.DELETE_GROUP_TRASH_MESSAGE, { count: deletedItemCount });
+    if (!(await this.confirmDelete(PWM_TEXT.CONFIRM_DELETE_GROUP_TITLE, deleteMessage))) {
       return;
     }
 
@@ -1851,7 +1851,7 @@ export class PasswordManagerModal extends Modal {
       return;
     }
     const deleteMessage = this.getDeleteItemsMessage(itemIds);
-    if (!(await this.confirmDelete(PWM_TEXT.confirmDeleteItemTitle, deleteMessage))) {
+    if (!(await this.confirmDelete(PWM_TEXT.CONFIRM_DELETE_ITEM_TITLE, deleteMessage))) {
       return;
     }
 
@@ -1885,24 +1885,24 @@ export class PasswordManagerModal extends Modal {
 
   private getDeleteItemsMessage(itemIds: string[]) {
     if (this.isTrashMode()) {
-      return formatPWMText(PWM_TEXT.deleteItemPermanentMessage, { count: itemIds.length });
+      return formatPWMText(PWM_TEXT.DELETE_ITEM_PERMANENT_MESSAGE, { count: itemIds.length });
     }
 
     const directDeleteCount = itemIds.filter((itemId) => this.plugin.shouldDeleteItemDirectlyById(itemId)).length;
     const trashCount = itemIds.length - directDeleteCount;
 
     if (directDeleteCount && trashCount) {
-      return formatPWMText(PWM_TEXT.deleteItemMixedMessage, {
+      return formatPWMText(PWM_TEXT.DELETE_ITEM_MIXED_MESSAGE, {
         directCount: directDeleteCount,
         trashCount,
       });
     }
 
     if (directDeleteCount) {
-      return formatPWMText(PWM_TEXT.deleteItemDirectMessage, { count: directDeleteCount });
+      return formatPWMText(PWM_TEXT.DELETE_ITEM_DIRECT_MESSAGE, { count: directDeleteCount });
     }
 
-    return formatPWMText(PWM_TEXT.deleteItemTrashMessage, { count: trashCount });
+    return formatPWMText(PWM_TEXT.DELETE_ITEM_TRASH_MESSAGE, { count: trashCount });
   }
 
   private async restoreSelectedItems() {
@@ -2025,10 +2025,10 @@ export class PasswordManagerModal extends Modal {
           const text = await file.text();
           await importer(text);
           await this.plugin.savePluginData();
-          new Notice(PWM_TEXT.importSuccess);
+          new Notice(PWM_TEXT.IMPORT_SUCCESS);
           this.render();
         } catch {
-          new Notice(PWM_TEXT.importFailed);
+          new Notice(PWM_TEXT.IMPORT_FAILED);
         }
       })();
     });
@@ -2151,8 +2151,8 @@ class ConfirmModal extends Modal {
     contentEl.createEl('p', { text: this.message });
 
     const actions = contentEl.createDiv({ cls: 'modal-button-container' });
-    const cancelButton = actions.createEl('button', { text: PWM_TEXT.cancel });
-    const confirmButton = actions.createEl('button', { text: PWM_TEXT.confirm, cls: 'mod-cta' });
+    const cancelButton = actions.createEl('button', { text: PWM_TEXT.CANCEL });
+    const confirmButton = actions.createEl('button', { text: PWM_TEXT.CONFIRM, cls: 'mod-cta' });
 
     cancelButton.addEventListener('click', () => {
       this.onResolve(false);

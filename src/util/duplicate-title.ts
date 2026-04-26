@@ -3,7 +3,7 @@ import type { PasswordItem } from './types';
 
 export function getNextDuplicatedTitle(items: PasswordItem[], title: string) {
   const match = title.match(/^(.*?)(?:\s*\((\d+)\))?$/);
-  const baseTitle = match?.[1]?.trim() || title.trim() || PWM_TEXT.untitledItem;
+  const baseTitle = match?.[1]?.trim() || title.trim() || PWM_TEXT.UNTITLED_ITEM;
   const escapedBaseTitle = escapeRegExp(baseTitle);
   const duplicateRegex = new RegExp(`^${escapedBaseTitle}(?:\\s*\\((\\d+)\\))?$`);
 

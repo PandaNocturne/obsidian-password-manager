@@ -17,7 +17,7 @@ export class PasswordEncryptionService {
     }
 
     if (!config.encryptionVerifier) {
-      new Notice(PWM_TEXT.encryptionNotConfigured);
+      new Notice(PWM_TEXT.ENCRYPTION_NOT_CONFIGURED);
       return false;
     }
 
@@ -37,7 +37,7 @@ export class PasswordEncryptionService {
 
     const unlocked = await this.unlockWithPassword(password);
     if (!unlocked) {
-      new Notice(PWM_TEXT.encryptionPasswordInvalid);
+      new Notice(PWM_TEXT.ENCRYPTION_PASSWORD_INVALID);
       return false;
     }
     return true;
@@ -50,7 +50,7 @@ export class PasswordEncryptionService {
     }
 
     if (!config.encryptionVerifier) {
-      new Notice(PWM_TEXT.encryptionNotConfigured);
+      new Notice(PWM_TEXT.ENCRYPTION_NOT_CONFIGURED);
       return false;
     }
 
@@ -70,16 +70,16 @@ export class PasswordEncryptionService {
 
     const unlocked = await this.unlockWithPassword(password);
     if (!unlocked) {
-      new Notice(PWM_TEXT.encryptionPasswordInvalid);
+      new Notice(PWM_TEXT.ENCRYPTION_PASSWORD_INVALID);
       return false;
     }
     return true;
   }
 
   async enableEncryption() {
-    const passwords = await this.requestPasswords(PWM_TEXT.enableEncryptionPassword, [
-      { key: 'password', label: PWM_TEXT.newEncryptionPassword },
-      { key: 'confirmPassword', label: PWM_TEXT.confirmEncryptionPassword },
+    const passwords = await this.requestPasswords(PWM_TEXT.ENABLE_ENCRYPTION_PASSWORD, [
+      { key: 'password', label: PWM_TEXT.NEW_ENCRYPTION_PASSWORD },
+      { key: 'confirmPassword', label: PWM_TEXT.CONFIRM_ENCRYPTION_PASSWORD },
     ]);
     if (!passwords) {
       return false;
@@ -88,7 +88,7 @@ export class PasswordEncryptionService {
     const password = passwords.password?.trim() ?? '';
     const confirmPassword = passwords.confirmPassword?.trim() ?? '';
     if (!password || password !== confirmPassword) {
-      new Notice(PWM_TEXT.encryptionPasswordMismatch);
+      new Notice(PWM_TEXT.ENCRYPTION_PASSWORD_MISMATCH);
       return false;
     }
 
@@ -104,7 +104,7 @@ export class PasswordEncryptionService {
     });
 
     await this.context.savePluginData();
-    new Notice(PWM_TEXT.encryptionEnabledNotice);
+    new Notice(PWM_TEXT.ENCRYPTION_ENABLED_NOTICE);
     return true;
   }
 
@@ -121,21 +121,21 @@ export class PasswordEncryptionService {
       return true;
     }
 
-    const password = await this.requestSinglePassword(PWM_TEXT.disableEncryptionPassword);
+    const password = await this.requestSinglePassword(PWM_TEXT.DISABLE_ENCRYPTION_PASSWORD);
     if (!password) {
       return false;
     }
 
     const valid = await verifyPassword(password, config.encryptionVerifier);
     if (!valid) {
-      new Notice(PWM_TEXT.encryptionPasswordInvalid);
+      new Notice(PWM_TEXT.ENCRYPTION_PASSWORD_INVALID);
       return false;
     }
 
     if (!this.context.getEncryptionState().hasUnlockedData) {
       const unlocked = await this.unlockWithPassword(password);
       if (!unlocked) {
-        new Notice(PWM_TEXT.encryptionPasswordInvalid);
+        new Notice(PWM_TEXT.ENCRYPTION_PASSWORD_INVALID);
         return false;
       }
     }
@@ -152,25 +152,25 @@ export class PasswordEncryptionService {
       lastVerifiedAt: 0,
       hasEncryptedStorage: false,
     });
-    new Notice(PWM_TEXT.encryptionDisabledNotice);
+    new Notice(PWM_TEXT.ENCRYPTION_DISABLED_NOTICE);
     return true;
   }
 
   async changeEncryptionPassword() {
     const config = this.context.pluginConfig;
     if (!config.encryptionVerifier) {
-      new Notice(PWM_TEXT.encryptionNotConfigured);
+      new Notice(PWM_TEXT.ENCRYPTION_NOT_CONFIGURED);
       return false;
     }
 
-    const passwords = await this.requestPasswords(PWM_TEXT.changeEncryptionPassword, [
+    const passwords = await this.requestPasswords(PWM_TEXT.CHANGE_ENCRYPTION_PASSWORD, [
       {
         key: 'currentPassword',
-        label: PWM_TEXT.currentEncryptionPassword,
+        label: PWM_TEXT.CURRENT_ENCRYPTION_PASSWORD,
         value: config.persistEncryptionPassword ? config.savedEncryptionPassword : '',
       },
-      { key: 'newPassword', label: PWM_TEXT.newEncryptionPassword },
-      { key: 'confirmPassword', label: PWM_TEXT.confirmEncryptionPassword },
+      { key: 'newPassword', label: PWM_TEXT.NEW_ENCRYPTION_PASSWORD },
+      { key: 'confirmPassword', label: PWM_TEXT.CONFIRM_ENCRYPTION_PASSWORD },
     ]);
     if (!passwords) {
       return false;
@@ -180,19 +180,19 @@ export class PasswordEncryptionService {
     const newPassword = passwords.newPassword?.trim() ?? '';
     const confirmPassword = passwords.confirmPassword?.trim() ?? '';
     if (!currentPassword || !newPassword || newPassword !== confirmPassword) {
-      new Notice(PWM_TEXT.encryptionPasswordMismatch);
+      new Notice(PWM_TEXT.ENCRYPTION_PASSWORD_MISMATCH);
       return false;
     }
 
     const valid = await verifyPassword(currentPassword, config.encryptionVerifier);
     if (!valid) {
-      new Notice(PWM_TEXT.encryptionPasswordInvalid);
+      new Notice(PWM_TEXT.ENCRYPTION_PASSWORD_INVALID);
       return false;
     }
 
     const unlocked = await this.unlockWithPassword(currentPassword);
     if (!unlocked) {
-      new Notice(PWM_TEXT.encryptionPasswordInvalid);
+      new Notice(PWM_TEXT.ENCRYPTION_PASSWORD_INVALID);
       return false;
     }
 
@@ -205,7 +205,7 @@ export class PasswordEncryptionService {
       savedEncryptionPassword: this.context.pluginConfig.persistEncryptionPassword ? newPassword : '',
     });
     await this.context.savePluginData();
-    new Notice(PWM_TEXT.encryptionPasswordChanged);
+    new Notice(PWM_TEXT.ENCRYPTION_PASSWORD_CHANGED);
     return true;
   }
 
@@ -225,7 +225,7 @@ export class PasswordEncryptionService {
         savedEncryptionPassword: '',
       });
       await this.context.savePluginConfig();
-      new Notice(PWM_TEXT.persistEncryptionPasswordDisabledNotice);
+      new Notice(PWM_TEXT.PERSIST_ENCRYPTION_PASSWORD_DISABLED_NOTICE);
       return true;
     }
 
@@ -238,7 +238,7 @@ export class PasswordEncryptionService {
 
       const unlocked = await this.unlockWithPassword(password);
       if (!unlocked) {
-        new Notice(PWM_TEXT.encryptionPasswordInvalid);
+        new Notice(PWM_TEXT.ENCRYPTION_PASSWORD_INVALID);
         return false;
       }
     }
@@ -248,13 +248,13 @@ export class PasswordEncryptionService {
       savedEncryptionPassword: password,
     });
     await this.context.savePluginConfig();
-    new Notice(PWM_TEXT.persistEncryptionPasswordEnabledNotice);
+    new Notice(PWM_TEXT.PERSIST_ENCRYPTION_PASSWORD_ENABLED_NOTICE);
     return true;
   }
 
   async openStorageFolder() {
     const storageFolderPath = this.context.getStorageFolder();
-    return this.openFolder(storageFolderPath, undefined, PWM_TEXT.openStorageFolderFailed);
+    return this.openFolder(storageFolderPath, undefined, PWM_TEXT.OPEN_STORAGE_FOLDER_FAILED);
   }
 
   private shouldVerifyEncryption() {
@@ -331,21 +331,21 @@ export class PasswordEncryptionService {
     return false;
   }
 
-  private async requestSinglePassword(title: string = PWM_TEXT.unlockManagerTitle) {
+  private async requestSinglePassword(title: string = PWM_TEXT.UNLOCK_MANAGER_TITLE) {
     const passwords = await this.requestPasswords(title, [
-      { key: 'password', label: PWM_TEXT.currentEncryptionPassword },
+      { key: 'password', label: PWM_TEXT.CURRENT_ENCRYPTION_PASSWORD },
     ]);
     return passwords?.password?.trim() ?? '';
   }
 
   private async requestPasswords(title: string, fields: PasswordPromptField[]) {
-    return PasswordPromptModal.open(this.app, { title, fields, confirmText: PWM_TEXT.confirm, cancelText: PWM_TEXT.cancel });
+    return PasswordPromptModal.open(this.app, { title, fields, confirmText: PWM_TEXT.CONFIRM, cancelText: PWM_TEXT.CANCEL });
   }
 
   private async openFolder(path: string, successMessage?: string, failedMessage?: string) {
     const adapter = this.app.vault.adapter;
     if (!(adapter instanceof FileSystemAdapter)) {
-      new Notice(failedMessage ?? PWM_TEXT.openStorageFolderFailed);
+      new Notice(failedMessage ?? PWM_TEXT.OPEN_STORAGE_FOLDER_FAILED);
       return false;
     }
 
@@ -366,7 +366,7 @@ export class PasswordEncryptionService {
       // fall through to failure notice
     }
 
-    new Notice(failedMessage ?? PWM_TEXT.openStorageFolderFailed);
+    new Notice(failedMessage ?? PWM_TEXT.OPEN_STORAGE_FOLDER_FAILED);
     return false;
   }
 }
