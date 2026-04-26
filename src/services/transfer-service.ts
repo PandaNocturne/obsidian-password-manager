@@ -53,7 +53,9 @@ export class PasswordTransferService {
       return null;
     }
 
-    const content = exportLibraryToMarkdown(this.context.data.groups, this.context.data.items);
+    const body = exportLibraryToMarkdown(this.context.data.groups, this.context.data.items);
+    const existingContent = await this.app.vault.read(file);
+    const content = this.mergeMarkdownBodyPreservingFrontmatter(existingContent, body);
     await this.app.vault.modify(file, content);
     return file;
   }
@@ -242,6 +244,15 @@ export class PasswordTransferService {
     } catch {
       throw new Error(PWM_TEXT.IMPORT_FAILED);
     }
+  }
+
+  private mergeMarkdownBodyPreservingFrontmatter(existingContent: string, body: string) {
+    const frontmatterMatch = existingContent.match(/^(---\r?\n[\s\S]*?\r?\n---)(?:\r?\n)*/);
+    if (!frontmatterMatch) {
+      return body;
+    }
+
+    return `${frontmatterMatch[1]}\n\n${body}`;
   }
 
   private getMarkdownExportPath() {
