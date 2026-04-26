@@ -1,0 +1,440 @@
+import { PWM_TEXT } from '../lang';
+import type { PasswordGroup, PasswordItem, PasswordManagerData, PasswordManagerExportPayload } from '../util/types';
+
+interface ParsedMarkdownGroup {
+  groupName: string;
+  items: Partial<PasswordItem>[];
+}
+
+const MARKDOWN_FIELD_LABELS = {
+  username: [PWM_TEXT.copyFieldUsername, 'Username'],
+  password: [PWM_TEXT.copyFieldPassword, 'Password'],
+  url: [PWM_TEXT.copyFieldUrl, 'URL', 'Link'],
+  notes: [PWM_TEXT.copyFieldNotes, 'Notes'],
+  groupTags: [PWM_TEXT.copyFieldGroupTags, 'Group Tags'],
+} as const;
+
+const CSV_HEADER_ALIASES = {
+  group: ['group', '组', 'groupName'],
+  title: ['title', '标题'],
+  username: ['username', '用户名'],
+  password: ['password', '密码'],
+  url: ['url', 'link', '链接'],
+  notes: ['notes', 'remark', '备注'],
+  pinned: ['pinned', '置顶'],
+  createdAt: ['createdAt', '创建时间'],
+} as const;
+
+function normalizeLookupKey(value: string) {
+  return value.trim().toLowerCase();
+}
+
+function matchLookupKey(value: string, aliases: readonly string[]) {
+  const normalized = normalizeLookupKey(value);
+  return aliases.some((alias) => normalizeLookupKey(alias) === normalized);
+}
+
+function getMarkdownFieldLabel(key: keyof typeof MARKDOWN_FIELD_LABELS) {
+  return MARKDOWN_FIELD_LABELS[key][0];
+}
+
+function parseMarkdownFieldLabel(label: string) {
+  if (matchLookupKey(label, MARKDOWN_FIELD_LABELS.username)) {
+    return 'username';
+  }
+  if (matchLookupKey(label, MARKDOWN_FIELD_LABELS.password)) {
+    return 'password';
+  }
+  if (matchLookupKey(label, MARKDOWN_FIELD_LABELS.url)) {
+    return 'url';
+  }
+  if (matchLookupKey(label, MARKDOWN_FIELD_LABELS.notes)) {
+    return 'notes';
+  }
+  if (matchLookupKey(label, MARKDOWN_FIELD_LABELS.groupTags)) {
+    return 'groupTags';
+  }
+  return null;
+}
+
+function getCsvHeaderIndex(headerMap: Map<string, number>, aliases: readonly string[]) {
+  for (const alias of aliases) {
+    const index = headerMap.get(normalizeLookupKey(alias));
+    if (index !== undefined) {
+      return index;
+    }
+  }
+  return undefined;
+}
+
+function escapeMarkdownValue(value: string) {
+  return value.replace(/\r\n/g, '\n').trim();
+}
+
+function wrapInlineCode(value: string) {
+  const normalized = escapeMarkdownValue(value);
+  return normalized ? `\`${normalized}\`` : '';
+}
+
+function wrapMarkdownLink(value: string) {
+  const normalized = escapeMarkdownValue(value);
+  return normalized ? `<${normalized}>` : '';
+}
+
+function unwrapMarkdownValue(value: string) {
+  return value.trim().replace(/^`([^`]*)`$/, '$1').replace(/^<([^>]+)>$/, '$1').trim();
+}
+
+function escapeCsvValue(value: string) {
+  const normalized = value.replace(/\r\n/g, '\n');
+  if (!/[",\n]/.test(normalized)) {
+    return normalized;
+  }
+  return `"${normalized.replace(/"/g, '""')}"`;
+}
+
+function parseCsvRows(text: string) {
+  const normalized = text.replace(/\r\n/g, '\n');
+  const rows: string[][] = [];
+  let currentRow: string[] = [];
+  let currentValue = '';
+  let inQuotes = false;
+
+  for (let index = 0; index < normalized.length; index += 1) {
+    const char = normalized[index];
+
+    if (char === '"') {
+      if (inQuotes && normalized[index + 1] === '"') {
+        currentValue += '"';
+        index += 1;
+      } else {
+        inQuotes = !inQuotes;
+      }
+      continue;
+    }
+
+    if (char === ',' && !inQuotes) {
+      currentRow.push(currentValue);
+      currentValue = '';
+      continue;
+    }
+
+    if (char === '\n' && !inQuotes) {
+      currentRow.push(currentValue);
+      rows.push(currentRow);
+      currentRow = [];
+      currentValue = '';
+      continue;
+    }
+
+    currentValue += char;
+  }
+
+  currentRow.push(currentValue);
+  rows.push(currentRow);
+
+  return rows.filter((row) => row.some((value) => value.length > 0));
+}
+
+function createEmptyImportedItem(title = ''): Partial<PasswordItem> {
+  return {
+    title,
+    username: '',
+    password: '',
+    urls: [],
+    notes: '',
+    pinned: false,
+  };
+}
+
+function getPrimaryUrl(item: Pick<PasswordItem, 'urls'> & { url?: string }) {
+  return item.urls[0] ?? item.url ?? '';
+}
+
+function getJoinedUrls(item: Pick<PasswordItem, 'urls'> & { url?: string }) {
+  return (item.urls.length ? item.urls : (item.url ? [item.url] : [])).join('\n');
+}
+
+function buildMarkdownItemLines(item: PasswordItem, headingLevel: 2 | 3) {
+  const headingPrefix = '#'.repeat(headingLevel);
+  return [
+    `${headingPrefix} ${escapeMarkdownValue(item.title) || PWM_TEXT.untitledItem}`,
+    '',
+    `- ${getMarkdownFieldLabel('username')}：${wrapInlineCode(item.username)}`,
+    `- ${getMarkdownFieldLabel('password')}：${wrapInlineCode(item.password)}`,
+    `- ${getMarkdownFieldLabel('url')}：${wrapMarkdownLink(getPrimaryUrl(item))}`,
+    `- ${getMarkdownFieldLabel('notes')}：${escapeMarkdownValue(item.notes)}`,
+  ].join('\n');
+}
+
+function formatGroupedMarkdown(groupName: string, items: PasswordItem[]) {
+  const itemBlocks = items.map((item) => buildMarkdownItemLines(item, 3));
+  return [
+    `## ${escapeMarkdownValue(groupName) || PWM_TEXT.untitledGroup}`,
+    '',
+    ...itemBlocks,
+  ].join('\n\n');
+}
+
+function parseGroupedMarkdownGroups(text: string): ParsedMarkdownGroup[] {
+  const lines = text.replace(/\r\n/g, '\n').split('\n');
+  const groups: ParsedMarkdownGroup[] = [];
+  let currentGroup: ParsedMarkdownGroup | null = null;
+  let currentItem: Partial<PasswordItem> | null = null;
+
+  const ensureGroup = () => {
+    if (currentGroup) {
+      return currentGroup;
+    }
+    currentGroup = { groupName: '', items: [] };
+    groups.push(currentGroup);
+    return currentGroup;
+  };
+
+  const startItem = (title: string) => {
+    currentItem = createEmptyImportedItem(title);
+    ensureGroup().items.push(currentItem);
+  };
+
+  lines.forEach((line) => {
+    if (line.startsWith('## ')) {
+      currentGroup = { groupName: line.slice(3).trim(), items: [] };
+      groups.push(currentGroup);
+      currentItem = null;
+      return;
+    }
+
+    if (line.startsWith('### ')) {
+      startItem(line.slice(4).trim());
+      return;
+    }
+
+    if (!currentItem) {
+      return;
+    }
+
+    const match = line.match(/^-\s*([^：:]+)[：:](.*)$/);
+    if (!match) {
+      return;
+    }
+
+    const [, rawLabel, rawValue] = match;
+    const field = parseMarkdownFieldLabel(rawLabel);
+    if (!field) {
+      return;
+    }
+
+    const value = unwrapMarkdownValue(rawValue);
+    switch (field) {
+      case 'username':
+        currentItem.username = value;
+        break;
+      case 'password':
+        currentItem.password = value;
+        break;
+      case 'url':
+        currentItem.urls = value ? [value] : [];
+        break;
+      case 'notes':
+        currentItem.notes = value;
+        break;
+      default:
+        break;
+    }
+  });
+
+  return groups.filter((group) => group.items.length > 0 || group.groupName);
+}
+
+function parseFlatMarkdownItems(text: string) {
+  const normalized = text.replace(/\r\n/g, '\n').trim();
+  if (!normalized) {
+    throw new Error('Invalid markdown payload');
+  }
+
+  const sections = normalized
+    .split(/\n(?:---|___|\*\*\*)\n/g)
+    .map((section) => section.trim())
+    .filter(Boolean);
+
+  return sections.map((section) => {
+    const lines = section.split('\n');
+    const heading = lines.find((line) => line.startsWith('## ') || line.startsWith('### '));
+    const item = createEmptyImportedItem(
+      heading?.startsWith('### ')
+        ? heading.slice(4).trim()
+        : heading?.slice(3).trim() || '',
+    );
+
+    lines.forEach((line) => {
+      const match = line.match(/^-\s*([^：:]+)[：:](.*)$/);
+      if (!match) {
+        return;
+      }
+
+      const [, rawLabel, rawValue] = match;
+      const field = parseMarkdownFieldLabel(rawLabel);
+      if (!field) {
+        return;
+      }
+
+      const value = unwrapMarkdownValue(rawValue);
+      switch (field) {
+        case 'username':
+          item.username = value;
+          break;
+        case 'password':
+          item.password = value;
+          break;
+        case 'url':
+          item.urls = value ? [value] : [];
+          break;
+        case 'notes':
+          item.notes = value;
+          break;
+        default:
+          break;
+      }
+    });
+
+    return item;
+  });
+}
+
+export function parseImportPayload(text: string): PasswordManagerExportPayload {
+  return JSON.parse(text) as PasswordManagerExportPayload;
+}
+
+export function downloadText(filename: string, content: string, mimeType: string) {
+  const blob = new Blob([content], { type: mimeType });
+  const url = URL.createObjectURL(blob);
+  const anchor = document.createElement('a');
+  anchor.href = url;
+  anchor.download = filename;
+  anchor.click();
+  URL.revokeObjectURL(url);
+}
+
+export async function downloadJson(filename: string, payload: PasswordManagerExportPayload) {
+  downloadText(filename, JSON.stringify(payload, null, 2), 'application/json');
+}
+
+export async function downloadMarkdownItems(filename: string, items: PasswordItem[], groups: PasswordGroup[]) {
+  const groupedContent = groups
+    .filter((group) => items.some((item) => item.groupIds.includes(group.id)))
+    .map((group) => formatGroupedMarkdown(group.name, items.filter((item) => item.groupIds.includes(group.id))))
+    .join('\n\n');
+
+  downloadText(filename, groupedContent, 'text/markdown;charset=utf-8');
+}
+
+export async function downloadMarkdownGroups(filename: string, groupsWithItems: Array<{ group: PasswordGroup; items: PasswordItem[] }>) {
+  const content = groupsWithItems
+    .filter(({ items }) => items.length > 0)
+    .map(({ group, items }) => formatGroupedMarkdown(group.name, items))
+    .join('\n\n');
+
+  downloadText(filename, content, 'text/markdown;charset=utf-8');
+}
+
+export async function downloadMarkdownGroup(filename: string, group: PasswordGroup, items: PasswordItem[]) {
+  downloadText(filename, formatGroupedMarkdown(group.name, items), 'text/markdown;charset=utf-8');
+}
+
+export async function downloadCsvGroups(filename: string, groupsWithItems: Array<{ group: PasswordGroup; items: PasswordItem[] }>) {
+  const header = ['group', 'title', 'username', 'password', 'url', 'notes', 'pinned', 'createdAt'];
+  const rows = groupsWithItems.flatMap(({ group, items }) => items.map((item) => [
+    group.name,
+    item.title,
+    item.username,
+    item.password,
+    getJoinedUrls(item),
+    item.notes,
+    String(item.pinned),
+    String(item.createdAt),
+  ].map(escapeCsvValue).join(',')));
+
+  downloadText(filename, [header.join(','), ...rows].join('\n'), 'text/csv;charset=utf-8');
+}
+
+export async function downloadCsvGroup(filename: string, group: PasswordGroup, items: PasswordItem[]) {
+  const header = ['group', 'title', 'username', 'password', 'url', 'notes', 'pinned', 'createdAt'];
+  const rows = items.map((item) => [
+    group.name,
+    item.title,
+    item.username,
+    item.password,
+    getJoinedUrls(item),
+    item.notes,
+    String(item.pinned),
+    String(item.createdAt),
+  ].map(escapeCsvValue).join(','));
+
+  downloadText(filename, [header.join(','), ...rows].join('\n'), 'text/csv;charset=utf-8');
+}
+
+export function parseMarkdownGroup(text: string) {
+  const groups = parseGroupedMarkdownGroups(text).filter((group) => group.items.length > 0);
+  if (!groups.length) {
+    throw new Error('Invalid markdown payload');
+  }
+
+  return {
+    groupName: groups[0].groupName || PWM_TEXT.importGroupFallbackName,
+    items: groups[0].items,
+  };
+}
+
+export function parseCsvGroup(text: string) {
+  const rows = parseCsvRows(text);
+  if (rows.length < 2) {
+    throw new Error('Invalid csv payload');
+  }
+
+  const headers = rows[0];
+  const headerMap = new Map(headers.map((header, index) => [normalizeLookupKey(header), index]));
+  const groupIndex = getCsvHeaderIndex(headerMap, CSV_HEADER_ALIASES.group);
+  const titleIndex = getCsvHeaderIndex(headerMap, CSV_HEADER_ALIASES.title);
+  const usernameIndex = getCsvHeaderIndex(headerMap, CSV_HEADER_ALIASES.username);
+  const passwordIndex = getCsvHeaderIndex(headerMap, CSV_HEADER_ALIASES.password);
+  const urlIndex = getCsvHeaderIndex(headerMap, CSV_HEADER_ALIASES.url);
+  const notesIndex = getCsvHeaderIndex(headerMap, CSV_HEADER_ALIASES.notes);
+  const pinnedIndex = getCsvHeaderIndex(headerMap, CSV_HEADER_ALIASES.pinned);
+  const createdAtIndex = getCsvHeaderIndex(headerMap, CSV_HEADER_ALIASES.createdAt);
+
+  if (groupIndex === undefined || titleIndex === undefined) {
+    throw new Error('Invalid csv payload');
+  }
+
+  const dataRows = rows.slice(1);
+  return {
+    groupName: dataRows[0]?.[groupIndex]?.trim() || PWM_TEXT.importGroupFallbackName,
+    items: dataRows.map((row) => ({
+      title: row[titleIndex]?.trim() || '',
+      username: row[usernameIndex ?? -1]?.trim() || '',
+      password: row[passwordIndex ?? -1]?.trim() || '',
+      urls: (row[urlIndex ?? -1]?.split(/\r?\n/) ?? []).map((value) => value.trim()).filter(Boolean),
+      notes: row[notesIndex ?? -1]?.trim() || '',
+      pinned: row[pinnedIndex ?? -1]?.trim() === 'true',
+      createdAt: Number(row[createdAtIndex ?? -1]) || undefined,
+    })),
+  };
+}
+
+export function parseMarkdownItems(text: string, data: PasswordManagerData, defaultGroupId: string) {
+  const groupedItems = parseGroupedMarkdownGroups(text)
+    .flatMap((group) => group.items)
+    .filter((item) => item.title || item.username || item.password || item.urls?.length || item.notes);
+
+  if (groupedItems.length) {
+    return groupedItems.map((item) => ({
+      ...createEmptyImportedItem(item.title || ''),
+      ...item,
+    }));
+  }
+
+  return parseFlatMarkdownItems(text).map((item) => ({
+    ...createEmptyImportedItem(item.title || ''),
+    ...item,
+  }));
+}
