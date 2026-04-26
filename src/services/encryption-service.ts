@@ -352,10 +352,16 @@ export class PasswordEncryptionService {
     try {
       await adapter.mkdir(path).catch(() => undefined);
 
-      const shell = (window as Window & {
-        require?: (module: string) => { shell?: { openPath: (path: string) => Promise<string> } };
-      }).require?.('electron')?.shell;
-      const opened = await shell?.openPath(adapter.getFilePath(path));
+      const absolutePath = `${adapter.getBasePath()}/${path}`.replace(/[/\\]+/g, '/');
+      const electronModule =
+        (window as Window & {
+          require?: (module: string) => { shell?: { openPath: (targetPath: string) => Promise<string> } };
+        }).require?.('electron') ??
+        (globalThis as typeof globalThis & {
+          require?: (module: string) => { shell?: { openPath: (targetPath: string) => Promise<string> } };
+        }).require?.('electron');
+      const shell = electronModule?.shell;
+      const opened = await shell?.openPath(absolutePath);
       if (opened === '') {
         if (successMessage) {
           new Notice(successMessage);

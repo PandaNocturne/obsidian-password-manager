@@ -17,7 +17,7 @@ const MARKDOWN_FIELD_LABELS = {
 const CSV_HEADER_ALIASES = {
   group: ['group', '组', 'groupName'],
   title: ['title', '标题'],
-  username: ['username', '用户名'],
+  username: ['username', '账号'],
   password: ['password', '密码'],
   url: ['url', 'link', '链接'],
   notes: ['notes', 'remark', '备注'],
