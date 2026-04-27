@@ -751,7 +751,7 @@ export class PasswordManagerModal extends Modal {
 
     const footer = container.createDiv({ cls: 'pwm-footer-actions' });
     this.plugin.createIconButton(footer, 'folder-down', PWM_TEXT.IMPORT_GROUP, async () => {
-      await this.handleImport(async (text) => {
+      await this.handleImport((text) => {
         const group = this.plugin.importGroupFromText(text);
         this.selectedGroupId = group.id;
         this.selectedItemId = this.getPreferredSelectedItemId(group.id);
@@ -954,7 +954,7 @@ export class PasswordManagerModal extends Modal {
 
     const footer = container.createDiv({ cls: 'pwm-footer-actions' });
     this.plugin.createIconButton(footer, 'file-down', PWM_TEXT.IMPORT_ITEMS, async () => {
-      await this.handleImport(async (text) => {
+      await this.handleImport((text) => {
         const targetGroupId = this.isTrashMode()
           ? (this.plugin.data.groups[0]?.id ?? '')
           : this.selectedGroupId;
@@ -1940,7 +1940,7 @@ export class PasswordManagerModal extends Modal {
     });
   }
 
-  private handleImport(importer: (text: string) => Promise<void>, accept = 'application/json,.json'): Promise<void> {
+  private handleImport(importer: (text: string) => void | Promise<void>, accept = 'application/json,.json'): Promise<void> {
     const input = document.createElement('input');
     input.type = 'file';
     input.accept = accept;
