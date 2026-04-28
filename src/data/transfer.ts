@@ -1,4 +1,5 @@
 import { PWM_TEXT } from '../lang';
+import { escapeMarkdownValue, formatPasswordItemAsMarkdown } from '../util/markdown-item-format';
 import type { PasswordCopyFormat, PasswordGroup, PasswordItem, PasswordManagerData, PasswordManagerExportPayload } from '../util/types';
 
 function isBlankExportItem(item: PasswordItem) {
@@ -73,60 +74,6 @@ function getCsvHeaderIndex(headerMap: Map<string, number>, aliases: readonly str
     }
   }
   return undefined;
-}
-
-function escapeMarkdownValue(value: string) {
-  return value.replace(/\r\n/g, '\n').trim();
-}
-
-function wrapInlineCode(value: string) {
-  const normalized = escapeMarkdownValue(value);
-  return normalized ? `\`${normalized}\`` : '';
-}
-
-function wrapMarkdownLink(value: string) {
-  const normalized = escapeMarkdownValue(value);
-  return normalized ? `<${normalized}>` : '';
-}
-
-function formatMarkdownUrls(item: Pick<PasswordItem, 'urls'> & { url?: string }) {
-  const urls = item.urls.length ? item.urls : (item.url ? [item.url] : []);
-  if (!urls.length) {
-    return '';
-  }
-  if (urls.length === 1) {
-    return wrapMarkdownLink(urls[0] ?? '');
-  }
-  return `\n${urls.map((url) => `    - ${wrapMarkdownLink(url)}`).join('\n')}`;
-}
-
-function formatCalloutUrls(item: Pick<PasswordItem, 'urls'> & { url?: string }) {
-  const urls = item.urls.length ? item.urls : (item.url ? [item.url] : []);
-  if (!urls.length) {
-    return '';
-  }
-  if (urls.length === 1) {
-    return wrapMarkdownLink(urls[0] ?? '');
-  }
-  return `\n${urls.map((url) => `>   - ${wrapMarkdownLink(url)}`).join('\n')}`;
-}
-
-function formatMarkdownIndentedValue(value: string) {
-  const normalized = escapeMarkdownValue(value);
-  if (!normalized) {
-    return '';
-  }
-
-  return `\n${normalized.split('\n').map((line) => `    ${line}`).join('\n')}`;
-}
-
-function formatCalloutIndentedValue(value: string) {
-  const normalized = escapeMarkdownValue(value);
-  if (!normalized) {
-    return '';
-  }
-
-  return `\n${normalized.split('\n').map((line) => `>     ${line}`).join('\n')}`;
 }
 
 function unwrapMarkdownValue(value: string) {
@@ -205,53 +152,11 @@ function buildMarkdownItemLines(
   format: PasswordCopyFormat,
   exportBlankFields = true,
 ) {
-  const headingPrefix = '#'.repeat(headingLevel);
-  const title = escapeMarkdownValue(item.title) || PWM_TEXT.UNTITLED_ITEM;
-  const username = wrapInlineCode(item.username);
-  const password = wrapInlineCode(item.password);
-  const urls = format === 'callout' ? formatCalloutUrls(item) : formatMarkdownUrls(item);
-  const notes = format === 'callout' ? formatCalloutIndentedValue(item.notes) : formatMarkdownIndentedValue(item.notes);
-
-  const hasUsername = !!username;
-  const hasPassword = !!password;
-  const hasUrls = !!urls;
-  const hasNotes = !!notes;
-
-  if (format === 'callout') {
-    const lines = [`> [!info] ${title}`];
-
-    if (exportBlankFields || hasUsername) {
-      lines.push(`> - ${getMarkdownFieldLabel('username')}：${username}`);
-    }
-    if (exportBlankFields || hasPassword) {
-      lines.push(`> - ${getMarkdownFieldLabel('password')}：${password}`);
-    }
-    if (exportBlankFields || hasUrls) {
-      lines.push(`> - ${getMarkdownFieldLabel('url')}：${urls}`);
-    }
-    if (exportBlankFields || hasNotes) {
-      lines.push(`> - ${getMarkdownFieldLabel('notes')}：${notes}`);
-    }
-
-    return lines.join('\n');
-  }
-
-  const lines = [`${headingPrefix} ${title}`, ''];
-
-  if (exportBlankFields || hasUsername) {
-    lines.push(`- ${getMarkdownFieldLabel('username')}：${username}`);
-  }
-  if (exportBlankFields || hasPassword) {
-    lines.push(`- ${getMarkdownFieldLabel('password')}：${password}`);
-  }
-  if (exportBlankFields || hasUrls) {
-    lines.push(`- ${getMarkdownFieldLabel('url')}：${urls}`);
-  }
-  if (exportBlankFields || hasNotes) {
-    lines.push(`- ${getMarkdownFieldLabel('notes')}：${notes}`);
-  }
-
-  return lines.join('\n');
+  return formatPasswordItemAsMarkdown(item, {
+    headingLevel,
+    format,
+    exportBlankFields,
+  });
 }
 
 function formatGroupedMarkdown(

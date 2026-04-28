@@ -81,6 +81,8 @@ export const PWM_TEXT = {
   CONFIRM_DELETE_SETTING_DESC: '关闭后将直接删除分组或条目。',
   COPY_FORMAT_SETTING: '复制格式',
   COPY_FORMAT_SETTING_DESC: '设置密码信息复制到剪贴板时使用的内容格式。',
+  COPY_BLANK_FIELDS_SETTING: '复制空白项',
+  COPY_BLANK_FIELDS_SETTING_DESC: '关闭后，复制密码信息时会跳过没有值的属性。',
   COPY_FORMAT_MARKDOWN: '标题模式',
   COPY_FORMAT_CALLOUT: 'Callout 格式',
   STORAGE_FOLDER_SETTING: '数据存储文件夹',

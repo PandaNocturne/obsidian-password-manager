@@ -158,6 +158,10 @@ export function normalizeSettings(settings: unknown): PasswordManagerSettings {
         ? source.confirmBeforeDelete
         : DEFAULT_DATA.settings.confirmBeforeDelete,
     copyFormat: normalizeCopyFormat(source?.copyFormat),
+    copyBlankFields:
+      typeof source?.copyBlankFields === 'boolean'
+        ? source.copyBlankFields
+        : DEFAULT_DATA.settings.copyBlankFields,
     showItemUsername:
       typeof source?.showItemUsername === 'boolean'
         ? source.showItemUsername

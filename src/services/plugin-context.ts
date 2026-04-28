@@ -393,7 +393,12 @@ export class PasswordPluginContext {
       return false;
     }
 
-    const content = formatPasswordItemForCopy(item, this.data.groups, this.data.settings.copyFormat);
+    const content = formatPasswordItemForCopy(
+      item,
+      this.data.groups,
+      this.data.settings.copyFormat,
+      this.data.settings.copyBlankFields,
+    );
     await navigator.clipboard.writeText(content);
     new Notice(PWM_TEXT.COPIED_PASSWORD_INFO);
     return true;

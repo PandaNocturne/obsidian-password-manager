@@ -81,6 +81,8 @@ export const PWM_TEXT = {
   CONFIRM_DELETE_SETTING_DESC: 'When disabled, groups or items will be deleted directly.',
   COPY_FORMAT_SETTING: 'Copy format',
   COPY_FORMAT_SETTING_DESC: 'Set the format used when copying password information to the clipboard.',
+  COPY_BLANK_FIELDS_SETTING: 'Copy blank fields',
+  COPY_BLANK_FIELDS_SETTING_DESC: 'When disabled, fields without a value are skipped when copying password information.',
   COPY_FORMAT_MARKDOWN: 'Heading mode',
   COPY_FORMAT_CALLOUT: 'Callout format',
   STORAGE_FOLDER_SETTING: 'Data storage folder',

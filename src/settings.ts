@@ -8,6 +8,7 @@ import { MarkdownFileSuggestModal } from './ui/markdown-file-suggest-modal';
 export interface PasswordManagerSettings {
   confirmBeforeDelete: boolean;
   copyFormat: PasswordCopyFormat;
+  copyBlankFields: boolean;
   showItemUsername: boolean;
   showItemUrl: boolean;
   showItemGroupTags: boolean;
@@ -42,6 +43,7 @@ export interface PasswordPluginConfig {
 export const DEFAULT_PASSWORD_MANAGER_SETTINGS: PasswordManagerSettings = {
   confirmBeforeDelete: true,
   copyFormat: 'markdown',
+  copyBlankFields: true,
   showItemUsername: true,
   showItemUrl: true,
   showItemGroupTags: true,
@@ -139,6 +141,18 @@ export class PasswordManagerSettingTab extends PluginSettingTab {
           .setValue(this.plugin.data.settings.copyFormat)
           .onChange(async (value: PasswordCopyFormat) => {
             this.plugin.updateSettings({ copyFormat: value });
+            await this.plugin.savePluginData();
+          }),
+      );
+
+    new Setting(containerEl)
+      .setName(PWM_TEXT.COPY_BLANK_FIELDS_SETTING)
+      .setDesc(PWM_TEXT.COPY_BLANK_FIELDS_SETTING_DESC)
+      .addToggle((toggle) =>
+        toggle
+          .setValue(this.plugin.data.settings.copyBlankFields)
+          .onChange(async (value) => {
+            this.plugin.updateSettings({ copyBlankFields: value });
             await this.plugin.savePluginData();
           }),
       );
