@@ -577,6 +577,10 @@ export class PasswordManagerModal extends Modal {
     const actions = header.createDiv({ cls: 'pwm-actions' });
     if (!this.isTrashMode()) {
       this.plugin.createIconButton(actions, 'plus', PWM_TEXT.ADD_GROUP, async () => {
+        const saved = await this.flushSelectedItemDetailsBeforeNavigate();
+        if (!saved) {
+          return;
+        }
         const allowed = await this.ensureWriteAccess();
         if (!allowed) {
           return;
@@ -809,6 +813,10 @@ export class PasswordManagerModal extends Modal {
       this.plugin.createIconButton(actions, 'plus', PWM_TEXT.ADD_ITEM, async () => {
         if (!this.selectedGroupId) {
           new Notice(PWM_TEXT.SELECT_GROUP_FIRST);
+          return;
+        }
+        const saved = await this.flushSelectedItemDetailsBeforeNavigate();
+        if (!saved) {
           return;
         }
         const allowed = await this.ensureWriteAccess();
