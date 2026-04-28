@@ -44,6 +44,14 @@ const SORT_MENU_ICON = 'arrow-up-down';
 
 type PasswordManagerModalMode = 'default' | 'trash';
 
+type DetailFieldKey = 'title' | 'username' | 'password' | 'notes';
+type DetailFocusTarget = {
+  field: DetailFieldKey | 'url';
+  index?: number;
+  cursorStart?: number;
+  cursorEnd?: number;
+};
+
 export class PasswordManagerModal extends Modal {
   private mode: PasswordManagerModalMode;
   private rootEl: HTMLDivElement | null = null;
@@ -80,8 +88,11 @@ export class PasswordManagerModal extends Modal {
     urls: [''],
     notes: '',
   };
-  private detailInputs: Partial<Record<'title' | 'username' | 'password' | 'notes', HTMLInputElement | HTMLTextAreaElement>> = {};
+  private detailInputs: Partial<Record<DetailFieldKey, HTMLInputElement | HTMLTextAreaElement>> = {};
   private detailUrlInputs: HTMLInputElement[] = [];
+  private detailsSaveButtonEl: HTMLButtonElement | null = null;
+  private pendingDetailFocusTarget: DetailFocusTarget | null = null;
+  private detailsDirty = false;
   private isSavingDetails = false;
 
   constructor(
@@ -435,6 +446,7 @@ export class PasswordManagerModal extends Modal {
     this.groupsListEl = null;
     this.itemsListEl = null;
     this.detailsBodyEl = null;
+    this.detailsSaveButtonEl = null;
   }
 
   private ensureHeaderSearch() {
@@ -1001,6 +1013,7 @@ export class PasswordManagerModal extends Modal {
 
   private renderDetails(container: HTMLElement) {
     container.empty();
+    this.detailsSaveButtonEl = null;
 
     const header = container.createDiv({ cls: 'pwm-header' });
     header.createEl('h3', { text: PWM_TEXT.DETAILS });
@@ -1015,7 +1028,7 @@ export class PasswordManagerModal extends Modal {
       await this.deleteSelectedItems();
     });
     if (!this.isTrashMode()) {
-      this.plugin.createIconButton(actions, 'save', PWM_TEXT.SAVE_PASSWORD_INFO, async () => {
+      this.detailsSaveButtonEl = this.plugin.createIconButton(actions, 'save', PWM_TEXT.SAVE_PASSWORD_INFO, async () => {
         await this.saveSelectedItemDetails();
       });
     }
@@ -1026,7 +1039,10 @@ export class PasswordManagerModal extends Modal {
     const item = this.getCurrentItem(this.selectedItemId);
     if (!item) {
       this.detailsDraftItemId = '';
+      this.detailsDirty = false;
       this.detailInputs = {};
+      this.detailUrlInputs = [];
+      this.syncDetailsSaveButtonVisibility();
       detail.createDiv({ text: PWM_TEXT.NO_ITEM, cls: 'pwm-empty' });
       this.renderDetailsBottomToolbar(body);
       return;
@@ -1041,6 +1057,7 @@ export class PasswordManagerModal extends Modal {
     this.detailInputs.title = titleInput;
     titleInput.addEventListener('input', () => {
       this.detailsDraft.title = titleInput.value;
+      this.updateDetailsDirtyState();
     });
 
     const usernameInput = this.createTextField(
@@ -1063,6 +1080,7 @@ export class PasswordManagerModal extends Modal {
     this.detailInputs.username = usernameInput;
     usernameInput.addEventListener('input', () => {
       this.detailsDraft.username = usernameInput.value;
+      this.updateDetailsDirtyState();
     });
 
     const passwordInput = this.createPasswordField(detail, this.detailsDraft.password);
@@ -1070,6 +1088,7 @@ export class PasswordManagerModal extends Modal {
     this.detailInputs.password = passwordInput;
     passwordInput.addEventListener('input', () => {
       this.detailsDraft.password = passwordInput.value;
+      this.updateDetailsDirtyState();
     });
 
     this.renderUrlFields(detail);
@@ -1093,8 +1112,11 @@ export class PasswordManagerModal extends Modal {
     this.detailInputs.notes = notesTextarea;
     notesTextarea.addEventListener('input', () => {
       this.detailsDraft.notes = notesTextarea.value;
+      this.updateDetailsDirtyState();
     });
 
+    this.syncDetailsSaveButtonVisibility();
+    this.restorePendingDetailFocus();
     this.renderTagsFooter(detail, item);
     this.renderDetailsBottomToolbar(body);
   }
@@ -1106,8 +1128,12 @@ export class PasswordManagerModal extends Modal {
 
     if (!this.isTrashMode()) {
       this.plugin.createIconButton(header, 'plus', PWM_TEXT.ADD_LINK, () => {
-        this.detailsDraft.urls = [...this.getNormalizedDraftUrls(), ''];
-        this.render();
+        const nextIndex = this.detailsDraft.urls.length;
+        this.detailsDraft.urls = [...this.detailsDraft.urls, ''];
+        this.updateDetailsDirtyState();
+        this.rerenderDetails({
+          focusTarget: { field: 'url', index: nextIndex, cursorStart: 0, cursorEnd: 0 },
+        });
       });
     }
 
@@ -1136,6 +1162,7 @@ export class PasswordManagerModal extends Modal {
       const nextUrls = [...this.detailsDraft.urls];
       nextUrls[index] = input.value;
       this.detailsDraft.urls = nextUrls;
+      this.updateDetailsDirtyState();
     });
 
     const actions = row.createDiv({ cls: 'pwm-inline-actions pwm-floating-actions' });
@@ -1155,7 +1182,11 @@ export class PasswordManagerModal extends Modal {
       this.plugin.createIconButton(actions, 'trash', PWM_TEXT.REMOVE_LINK, () => {
         const nextUrls = this.detailsDraft.urls.filter((_, currentIndex) => currentIndex !== index);
         this.detailsDraft.urls = nextUrls.length ? nextUrls : [''];
-        this.render();
+        const nextFocusIndex = Math.max(0, Math.min(index, this.detailsDraft.urls.length - 1));
+        this.updateDetailsDirtyState();
+        this.rerenderDetails({
+          focusTarget: { field: 'url', index: nextFocusIndex },
+        });
       });
     }
 
@@ -1444,12 +1475,77 @@ export class PasswordManagerModal extends Modal {
     this.detailsDraft.notes = this.detailInputs.notes?.value ?? this.detailsDraft.notes;
   }
 
+  private hasDetailsDraftChanged(item: PasswordItem) {
+    const normalizedUrls = this.getNormalizedDraftUrls();
+    return item.title !== this.detailsDraft.title
+      || item.username !== this.detailsDraft.username
+      || item.password !== this.detailsDraft.password
+      || item.notes !== this.detailsDraft.notes
+      || item.urls.length !== normalizedUrls.length
+      || item.urls.some((url, index) => url !== normalizedUrls[index]);
+  }
+
+  private updateDetailsDirtyState() {
+    const item = this.plugin.getItem(this.selectedItemId);
+    this.detailsDirty = !!item && this.hasDetailsDraftChanged(item);
+    this.syncDetailsSaveButtonVisibility();
+  }
+
+  private syncDetailsSaveButtonVisibility() {
+    this.detailsSaveButtonEl?.toggleClass('pwm-button-warning', this.detailsDirty && !this.isTrashMode());
+  }
+
+  private rerenderItems() {
+    const column = this.rootEl?.querySelector<HTMLElement>('.pwm-items-column');
+    if (!column) {
+      return;
+    }
+
+    const scrollTop = this.itemsListEl?.scrollTop ?? 0;
+    this.renderItems(column);
+    this.itemsListEl?.scrollTo({ top: scrollTop });
+  }
+
+  private rerenderDetails(options?: { focusTarget?: DetailFocusTarget }) {
+    const column = this.rootEl?.querySelector<HTMLElement>('.pwm-details-column');
+    if (!column) {
+      return;
+    }
+
+    const scrollTop = this.detailsBodyEl?.scrollTop ?? 0;
+    this.pendingDetailFocusTarget = options?.focusTarget ?? null;
+    this.renderDetails(column);
+    this.detailsBodyEl?.scrollTo({ top: scrollTop });
+  }
+
+  private restorePendingDetailFocus() {
+    const target = this.pendingDetailFocusTarget;
+    if (!target) {
+      return;
+    }
+
+    this.pendingDetailFocusTarget = null;
+    window.setTimeout(() => {
+      const input = target.field === 'url'
+        ? this.detailUrlInputs[target.index ?? 0]
+        : this.detailInputs[target.field];
+      if (!input || input.disabled) {
+        return;
+      }
+
+      input.focus();
+      const cursorStart = target.cursorStart ?? input.value.length;
+      const cursorEnd = target.cursorEnd ?? cursorStart;
+      input.setSelectionRange?.(cursorStart, cursorEnd);
+    }, 0);
+  }
+
   private async flushSelectedItemDetailsBeforeNavigate() {
-    if (this.isTrashMode()) {
+    if (this.isTrashMode() || !this.detailsDirty) {
       return true;
     }
     this.syncDetailsDraftFromInputs();
-    return this.saveSelectedItemDetails({ silent: true });
+    return this.saveSelectedItemDetails({ silent: true, refreshItems: false });
   }
 
   private ensureDetailsDraft(item: PasswordItem | DeletedPasswordItem) {
@@ -1465,9 +1561,10 @@ export class PasswordManagerModal extends Modal {
       urls: item.urls.length ? [...item.urls] : [''],
       notes: item.notes,
     };
+    this.detailsDirty = false;
   }
 
-  private async saveSelectedItemDetails(options?: { silent?: boolean }) {
+  private async saveSelectedItemDetails(options?: { silent?: boolean; refreshItems?: boolean }) {
     if (this.isTrashMode()) {
       return true;
     }
@@ -1478,13 +1575,10 @@ export class PasswordManagerModal extends Modal {
     }
 
     const normalizedUrls = this.getNormalizedDraftUrls();
-    const hasChanged = item.title !== this.detailsDraft.title
-      || item.username !== this.detailsDraft.username
-      || item.password !== this.detailsDraft.password
-      || item.notes !== this.detailsDraft.notes
-      || item.urls.length !== normalizedUrls.length
-      || item.urls.some((url, index) => url !== normalizedUrls[index]);
+    const hasChanged = this.hasDetailsDraftChanged(item);
     if (!hasChanged) {
+      this.detailsDirty = false;
+      this.syncDetailsSaveButtonVisibility();
       return true;
     }
 
@@ -1505,11 +1599,16 @@ export class PasswordManagerModal extends Modal {
         urls: normalizedUrls,
         notes: this.detailsDraft.notes,
       });
+      this.detailsDraft.urls = normalizedUrls.length ? [...normalizedUrls] : [''];
       await this.plugin.savePluginData();
+      this.detailsDirty = false;
+      this.syncDetailsSaveButtonVisibility();
+      if (options?.refreshItems !== false) {
+        this.rerenderItems();
+      }
       if (!options?.silent) {
         new Notice(PWM_TEXT.SAVED_PASSWORD_INFO);
       }
-      this.render();
       return true;
     } finally {
       this.isSavingDetails = false;
