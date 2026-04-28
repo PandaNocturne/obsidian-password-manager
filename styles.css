@@ -243,7 +243,7 @@
 .pwm-column.pwm-items-column .pwm-list {
   display: grid;
   gap: 5px;
-  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
   max-height: fit-content;
   margin-bottom: auto;
 }
