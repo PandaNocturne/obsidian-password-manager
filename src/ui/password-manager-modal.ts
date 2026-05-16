@@ -304,7 +304,7 @@ export class PasswordManagerModal extends Modal {
     const minDetailWidth = 340;
 
     handle.addClass('is-resizing');
-    document.body.addClass('pwm-column-resizing');
+    activeDocument.body.addClass('pwm-column-resizing');
     handle.setPointerCapture(pointerId);
 
     const updateWidths = (clientX: number) => {
@@ -334,7 +334,7 @@ export class PasswordManagerModal extends Modal {
 
     const finishResize = () => {
       handle.removeClass('is-resizing');
-      document.body.removeClass('pwm-column-resizing');
+      activeDocument.body.removeClass('pwm-column-resizing');
       handle.removeEventListener('pointermove', onPointerMove);
       handle.removeEventListener('pointerup', onPointerUp);
       handle.removeEventListener('pointercancel', onPointerCancel);
@@ -373,7 +373,7 @@ export class PasswordManagerModal extends Modal {
         handle.releasePointerCapture(pointerId);
       }
       handle.removeClass('is-resizing');
-      document.body.removeClass('pwm-column-resizing');
+      activeDocument.body.removeClass('pwm-column-resizing');
       handle.removeEventListener('pointermove', onPointerMove);
       handle.removeEventListener('pointerup', onPointerUp);
       handle.removeEventListener('pointercancel', onPointerCancel);
@@ -458,8 +458,9 @@ export class PasswordManagerModal extends Modal {
     titleContainer.addClass('pwm-modal-title-row');
 
     if (!this.titleCountEl) {
-      this.titleCountEl = document.createElement('div');
-      this.titleCountEl.addClass('pwm-badge', 'pwm-modal-title-count');
+      this.titleCountEl = titleContainer.createDiv({
+        cls: ['pwm-badge', 'pwm-modal-title-count'],
+      });
       this.titleEl.insertAdjacentElement('afterend', this.titleCountEl);
     }
 
@@ -2048,9 +2049,7 @@ export class PasswordManagerModal extends Modal {
   }
 
   private handleImport(importer: (text: string) => void | Promise<void>, accept = 'application/json,.json'): Promise<void> {
-    const input = document.createElement('input');
-    input.type = 'file';
-    input.accept = accept;
+    const input = this.contentEl.createEl('input', { type: 'file', attr: { accept } });
     return new Promise<void>((resolve, reject) => {
       input.addEventListener('change', () => {
         void (async () => {

@@ -359,15 +359,11 @@ export class PasswordEncryptionService {
       await adapter.mkdir(path).catch(() => undefined);
 
       const absolutePath = `${adapter.getBasePath()}/${path}`.replace(/[/\\]+/g, '/');
-      const electronWindow = window as Window & {
+      type WindowWithElectronRequire = Window & {
         require?: (module: string) => unknown;
       };
-      const electronGlobal = globalThis as typeof globalThis & {
-        require?: (module: string) => unknown;
-      };
-      const electronModule =
-        (electronWindow.require?.('electron') as ElectronShellModule | undefined) ??
-        (electronGlobal.require?.('electron') as ElectronShellModule | undefined);
+      const scopedWindow = activeDocument.defaultView as WindowWithElectronRequire | null;
+      const electronModule = scopedWindow?.require?.('electron') as ElectronShellModule | undefined;
       const shell = electronModule?.shell;
       const opened = shell ? await shell.openPath(absolutePath) : undefined;
       if (opened === '') {

@@ -43,10 +43,6 @@ function matchLookupKey(value: string, aliases: readonly string[]) {
   return aliases.some((alias) => normalizeLookupKey(alias) === normalized);
 }
 
-function getMarkdownFieldLabel(key: keyof typeof MARKDOWN_FIELD_LABELS) {
-  return MARKDOWN_FIELD_LABELS[key][0];
-}
-
 function parseMarkdownFieldLabel(label: string) {
   if (matchLookupKey(label, MARKDOWN_FIELD_LABELS.username)) {
     return 'username';
@@ -378,9 +374,9 @@ export function parseImportPayload(text: string): PasswordManagerExportPayload {
 export function downloadText(filename: string, content: string, mimeType: string) {
   const blob = new Blob([content], { type: mimeType });
   const url = URL.createObjectURL(blob);
-  const anchor = document.createElement('a');
-  anchor.href = url;
-  anchor.download = filename;
+  const anchor = activeDocument.body.createEl('a', {
+    attr: { href: url, download: filename },
+  });
   anchor.click();
   URL.revokeObjectURL(url);
 }
@@ -538,7 +534,7 @@ export function parseCsvGroup(text: string) {
   };
 }
 
-export function parseMarkdownItems(text: string, data: PasswordManagerData, defaultGroupId: string) {
+export function parseMarkdownItems(text: string, _data: PasswordManagerData, _defaultGroupId: string) {
   const groupedItems = parseGroupedMarkdownGroups(text)
     .flatMap((group) => group.items)
     .filter((item) => item.title || item.username || item.password || item.urls?.length || item.notes);

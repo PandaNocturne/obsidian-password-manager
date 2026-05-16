@@ -1,14 +1,11 @@
+import { getLanguage } from 'obsidian';
 import { PWM_TEXT as EN_TEXT } from './en';
 import { PWM_TEXT as ZH_CN_TEXT } from './zh-cn';
 
 type PwmText = typeof EN_TEXT;
 
 const resolveLocale = () => {
-  const language = (
-    globalThis.localStorage?.getItem('language')
-    || globalThis.navigator?.language
-    || 'zh-CN'
-  ).toLowerCase();
+  const language = getLanguage().toLowerCase();
 
   if (language.startsWith('en')) {
     return 'en';
