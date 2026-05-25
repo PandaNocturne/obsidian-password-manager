@@ -272,6 +272,7 @@ export class PasswordManagerSettingTab extends PluginSettingTab {
           .onChange(async (value) => {
             this.plugin.updatePluginConfig({ modalWidthExpr: value });
             await this.plugin.savePluginConfig();
+            this.plugin.refreshManagerLayouts();
           }),
       );
 
@@ -285,6 +286,7 @@ export class PasswordManagerSettingTab extends PluginSettingTab {
           .onChange(async (value) => {
             this.plugin.updatePluginConfig({ modalHeightExpr: value });
             await this.plugin.savePluginConfig();
+            this.plugin.refreshManagerLayouts();
           }),
       );
 
@@ -304,6 +306,7 @@ export class PasswordManagerSettingTab extends PluginSettingTab {
           .onChange(async (value) => {
             this.plugin.updatePluginConfig({ columnRatioExpr: value });
             await this.plugin.savePluginConfig();
+            this.plugin.refreshManagerLayouts();
           });
 
         text.inputEl.addEventListener('keydown', (event) => {

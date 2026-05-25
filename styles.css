@@ -1,11 +1,14 @@
-.modal.pwm-modal {
-  overflow: hidden;
-}
-.modal.pwm-modal .modal-content {
+.pwm-modal {
   display: flex;
   flex-direction: column;
-  height: 100%;
+  overflow: hidden;
+}
+.pwm-modal .modal-content {
+  display: flex;
+  flex-direction: column;
+  flex: 1 1 auto;
   min-height: 0;
+  height: auto;
   padding: 0;
   overflow: hidden;
 }

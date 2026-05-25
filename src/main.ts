@@ -16,6 +16,7 @@ export default class PasswordManagerPlugin extends Plugin {
   private encryptionService!: PasswordEncryptionService;
   private transferService!: PasswordTransferService;
   private readonly managerModals = new Set<PasswordManagerModal>();
+  private managerOpenInFlight: Promise<void> | null = null;
 
   get data(): PasswordManagerData {
     return this.context.data;
@@ -64,15 +65,71 @@ export default class PasswordManagerPlugin extends Plugin {
   }
 
   async openManager() {
+    const existing = this.getOpenManagerModal();
+    if (existing) {
+      existing.switchToMode('default');
+      existing.focus();
+      return;
+    }
+
+    if (this.managerOpenInFlight) {
+      await this.managerOpenInFlight;
+      this.getOpenManagerModal()?.focus();
+      return;
+    }
+
+    this.managerOpenInFlight = this.openManagerModal('default');
+    try {
+      await this.managerOpenInFlight;
+    } finally {
+      this.managerOpenInFlight = null;
+    }
+  }
+
+  async openTrash() {
+    const existing = this.getOpenManagerModal();
+    if (existing) {
+      existing.switchToMode('trash');
+      existing.focus();
+      return;
+    }
+
+    if (this.managerOpenInFlight) {
+      await this.managerOpenInFlight;
+      const modal = this.getOpenManagerModal();
+      if (modal) {
+        modal.switchToMode('trash');
+        modal.focus();
+      }
+      return;
+    }
+
+    this.managerOpenInFlight = this.openManagerModal('trash');
+    try {
+      await this.managerOpenInFlight;
+    } finally {
+      this.managerOpenInFlight = null;
+    }
+  }
+
+  private getOpenManagerModal() {
+    return this.managerModals.values().next().value;
+  }
+
+  private async openManagerModal(mode: 'default' | 'trash') {
     const allowed = await this.encryptionService.ensureEncryptionAccess();
     if (!allowed) {
       return;
     }
-    new PasswordManagerModal(this.app, this).open();
-  }
 
-  openTrash() {
-    new PasswordManagerModal(this.app, this, { mode: 'trash' }).open();
+    const existing = this.getOpenManagerModal();
+    if (existing) {
+      existing.switchToMode(mode);
+      existing.focus();
+      return;
+    }
+
+    new PasswordManagerModal(this.app, this, { mode }).open();
   }
 
   openSettings() {

@@ -1,5 +1,6 @@
 import { ButtonComponent, Modal, Setting, setIcon, type App } from 'obsidian';
 import { PWM_TEXT } from '../lang';
+import { applyPwmModalClass, clearPwmModalShell } from './pwm-modal-shell';
 
 const removeFromTabOrder = (element: HTMLElement | null) => {
   if (!element) {
@@ -46,6 +47,7 @@ export class PasswordPromptModal extends Modal {
   }
 
   onOpen() {
+    applyPwmModalClass(this.modalEl);
     const { contentEl } = this;
     contentEl.empty();
     this.titleEl.setText(this.options.title);
@@ -113,6 +115,7 @@ export class PasswordPromptModal extends Modal {
   }
 
   onClose() {
+    clearPwmModalShell(this.modalEl);
     this.contentEl.empty();
     if (!this.isResolved) {
       this.resolver(null);

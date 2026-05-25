@@ -1,8 +1,9 @@
 import { App, Menu, Modal, Notice, Scope, setIcon } from 'obsidian';
 import type PasswordManagerPlugin from '../main';
 import { PWM_TEXT, formatPWMText } from '../lang';
-import { includesKeyword, normalizeSearchKeyword } from '../util/search';
+import { matchesAllKeywordsInValue, matchesAnyFieldKeywords, parseSearchKeywords } from '../util/search';
 import type { DeletedPasswordItem, PasswordGroup, PasswordItem, PwmFieldAction, PwmSortMode, PwmTextFieldOptions } from '../util/types';
+import { applyPwmModalClass, clearPwmModalShell } from './pwm-modal-shell';
 
 function setCssProps(element: HTMLElement, styles: Record<string, string>) {
   Object.entries(styles).forEach(([property, value]) => {
@@ -116,7 +117,7 @@ export class PasswordManagerModal extends Modal {
   onOpen() {
     this.plugin.registerManagerModal(this);
     this.titleEl.setText(PWM_TEXT.MODAL_TITLE);
-    this.modalEl.addClass('pwm-modal');
+    applyPwmModalClass(this.modalEl);
     this.applyModalSize();
     this.contentEl.tabIndex = -1;
     this.ensureHeaderSearch();
@@ -140,6 +141,7 @@ export class PasswordManagerModal extends Modal {
     this.searchActionsEl = null;
     this.titleCountEl = null;
     this.titleEl.parentElement?.removeClass('pwm-modal-title-row');
+    clearPwmModalShell(this.modalEl);
     this.ensureScrollRefsCleared();
     this.contentEl.empty();
   }
@@ -219,6 +221,30 @@ export class PasswordManagerModal extends Modal {
 
     this.applyModalSize();
     this.applyLayoutWidths(this.rootEl);
+  }
+
+  focus() {
+    const parent = this.modalEl.parentElement;
+    if (parent) {
+      parent.appendChild(this.modalEl);
+    }
+    window.setTimeout(() => this.contentEl.focus(), 0);
+  }
+
+  switchToMode(mode: PasswordManagerModalMode) {
+    if (this.mode === mode) {
+      return;
+    }
+
+    this.mode = mode;
+    this.editingGroupId = '';
+    this.selectedGroupId = this.getResolvedSelectedGroupId();
+    this.selectedItemId = this.getPreferredSelectedItemId(this.selectedGroupId);
+    this.resetGroupSelection(this.selectedGroupId);
+    this.resetItemSelection(this.selectedItemId);
+    this.reconcileSelectionState();
+    void this.persistViewState();
+    this.render();
   }
 
   private getColumnElements() {
@@ -2077,28 +2103,28 @@ export class PasswordManagerModal extends Modal {
   }
 
   private getVisibleGroups(): PasswordGroup[] {
-    const keyword = normalizeSearchKeyword(this.keyword);
+    const keywords = parseSearchKeywords(this.keyword);
     const groups = this.getModeGroups();
-    if (!keyword) {
+    if (!keywords.length) {
       return groups;
     }
-    return groups.filter((group) => this.matchesGroupKeyword(group, keyword) || this.getVisibleItems(group.id).length > 0);
+    return groups.filter((group) => this.matchesGroupKeyword(group, keywords) || this.getVisibleItems(group.id).length > 0);
   }
 
   private getVisibleItems(groupId: string): Array<PasswordItem | DeletedPasswordItem> {
-    const keyword = normalizeSearchKeyword(this.keyword);
+    const keywords = parseSearchKeywords(this.keyword);
     const items = this.prioritizePinnedItems(this.getModeItemsByGroup(groupId));
 
-    if (!keyword) {
+    if (!keywords.length) {
       return items;
     }
 
     const group = this.getModeGroups().find((currentGroup: PasswordGroup) => currentGroup.id === groupId);
-    if (group && this.matchesGroupKeyword(group, keyword)) {
+    if (group && this.matchesGroupKeyword(group, keywords)) {
       return items;
     }
 
-    return this.prioritizePinnedItems(items.filter((item) => this.matchesItemKeyword(item, keyword)));
+    return this.prioritizePinnedItems(items.filter((item) => this.matchesItemKeyword(item, keywords)));
   }
 
   private getVisibleItemTotalCount() {
@@ -2115,14 +2141,17 @@ export class PasswordManagerModal extends Modal {
     return [...items].sort((left, right) => Number(right.pinned) - Number(left.pinned));
   }
 
-  private matchesGroupKeyword(group: PasswordGroup, keyword: string) {
-    return includesKeyword(group.name, keyword);
+  private matchesGroupKeyword(group: PasswordGroup, keywords: string[]) {
+    return matchesAllKeywordsInValue(group.name, keywords);
   }
 
-  private matchesItemKeyword(item: PasswordItem | DeletedPasswordItem, keyword: string) {
+  private matchesItemKeyword(item: PasswordItem | DeletedPasswordItem, keywords: string[]) {
     const groupNames = this.getItemGroups(item).map((group) => group.name);
     const trashDate = this.isTrashMode() && 'deletedAt' in item ? this.getTrashDateKey(item) : '';
-    return [item.title, item.username, item.urls.join(' '), item.notes, ...groupNames, trashDate].some((value) => includesKeyword(value, keyword));
+    return matchesAnyFieldKeywords(
+      [item.title, item.username, item.urls.join(' '), item.notes, ...groupNames, trashDate],
+      keywords,
+    );
   }
 
   private getResolvedSelectedGroupId(preferredGroupId?: string) {
@@ -2185,6 +2214,7 @@ class ConfirmModal extends Modal {
   }
 
   onOpen() {
+    applyPwmModalClass(this.modalEl);
     this.titleEl.setText(this.title);
     const { contentEl } = this;
     contentEl.empty();
@@ -2206,6 +2236,7 @@ class ConfirmModal extends Modal {
   }
 
   onClose() {
+    clearPwmModalShell(this.modalEl);
     this.contentEl.empty();
   }
 }
