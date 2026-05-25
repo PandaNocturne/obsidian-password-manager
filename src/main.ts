@@ -112,8 +112,9 @@ export default class PasswordManagerPlugin extends Plugin {
     }
   }
 
-  private getOpenManagerModal() {
-    return this.managerModals.values().next().value;
+  private getOpenManagerModal(): PasswordManagerModal | undefined {
+    const next = this.managerModals.values().next();
+    return next.done ? undefined : next.value;
   }
 
   private async openManagerModal(mode: 'default' | 'trash') {
